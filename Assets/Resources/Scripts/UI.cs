@@ -11,7 +11,7 @@ namespace Resources.Scripts
         }
         private static void OnHostButtonClicked()
         {
-            Main.TargetPlayer = Object.Instantiate(UnityEngine.Resources.Load<GameObject>("Prefabs/Player")).GetComponent<Character>();
+            Main.TargetPlayer = ObjectPool.GetObject(ID.Player).GetComponent<Character>();
             Main.CurrentStatus = Status.Game; 
             Main.UIMainMenuObject.gameObject.SetActive(false);
             Environment.SetEnvironment(EnvPreset.Night);

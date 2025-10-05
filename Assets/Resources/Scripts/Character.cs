@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
+using Resources.Scripts;
 using UnityEngine;
+using Object = System.Object;
 
 public class Character : MonoBehaviour
 {
@@ -11,11 +13,9 @@ public class Character : MonoBehaviour
     private float _currentSpeed;
     private Vector3 _directionBuffer;
     private Animator _animator;
-    private GameObject _footprintObject;
 
     private void Awake()
-    {
-        _footprintObject = UnityEngine.Resources.Load<GameObject>("Prefabs/Footprint");
+    { 
         _animator = GetComponent<Animator>();
         StartCoroutine(FootprintSpawnTimer());
         return;
@@ -24,11 +24,9 @@ public class Character : MonoBehaviour
         {
             while (true)
             {
-                yield return new WaitForSeconds(1);
+                yield return new WaitForSeconds(0.3f);
                 if (_currentSpeed > 0.1f)
-                {
-                    Instantiate(_footprintObject, transform.position, Quaternion.identity);
-                }
+                    ObjectPool.GetObject(ID.Footprint).transform.position = transform.position;
             } 
         }
     }
