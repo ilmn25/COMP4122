@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using UnityEngine;
-
+using Unity.Netcode;
 
 namespace Resources.Scripts
 {
-    public partial class Character : MonoBehaviour
+    public partial class Character : NetworkBehaviour
     {
         [NonSerialized] public Vector2 Direction; 
         private const int Speed = 5;
@@ -34,6 +34,7 @@ namespace Resources.Scripts
 
         private void Update()
         {
+            if (!IsOwner) return; // added
             HandleMovement();
             HandleAnimation();
         }
