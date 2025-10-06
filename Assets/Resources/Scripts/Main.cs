@@ -22,12 +22,14 @@ namespace Resources.Scripts
         public static Light2D AmbientLight;
         public static Light2D SpotLight;
         
+        public static LayerMask MaskStatic;
         private void Awake()
         {
             // Time.fixedDeltaTime = 0.30f;
             Application.targetFrameRate = 100; // set max fps 
             QualitySettings.vSyncCount = 0;
         
+            MaskStatic  = LayerMask.GetMask("Collide", "Map"); 
             ViewportObject = GameObject.Find("Viewport");
             MainCameraObject = GameObject.Find("MainCamera"); 
             UIMainMenuObject = GameObject.Find("MainMenu");
