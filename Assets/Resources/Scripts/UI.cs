@@ -1,10 +1,17 @@
 ﻿using UnityEngine;
 using Unity.Netcode;
+using Unity.Services.Core;
+using Unity.Services.Authentication;
+using Unity.Services.Relay;
+using Unity.Services.Relay.Models;
+using Unity.Netcode.Transports.UTP;
 
 namespace Resources.Scripts
 {
     public class UI
     { 
+        private static bool isUnityServicesInitialized = false;
+        
         public static void Start()
         {
             Main.UIHostButton.onClick.AddListener(OnHostButtonClicked);
@@ -16,11 +23,31 @@ namespace Resources.Scripts
             Main.UIHostObject.SetActive(false);
             Main.UIJoinObject.SetActive(false);
             
+            // Initialize Unity Services
+            InitializeUnityServices();
+            
             // Listen for when players connect
             if (NetworkManager.Singleton != null) // safety check 
             {
                 NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
                 NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+            }
+        }
+        
+        private static async void InitializeUnityServices()
+        {
+            if (isUnityServicesInitialized) return;
+            
+            try
+            {
+                await UnityServices.InitializeAsync();
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                isUnityServicesInitialized = true;
+                Debug.Log("Unity Services initialized successfully");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Failed to initialize Unity Services: {e}");
             }
         }
         
@@ -59,36 +86,84 @@ namespace Resources.Scripts
             }
         }
 
-        private static void OnHostButtonClicked()
+        private static async void OnHostButtonClicked()
         {
-            // Configure host to use port 7778 BEFORE starting
-            var transport = NetworkManager.Singleton.GetComponent<Unity.Netcode.Transports.UTP.UnityTransport>();
-            if (transport != null)
+            try
             {
-                transport.SetConnectionData("0.0.0.0", 7778); // Host listens on port 7778
-                Debug.Log("Host configured to listen on port 7778");
-            }
-            
-            bool success = NetworkManager.Singleton.StartHost();
-
-            if (success) 
-            {
+                // Ensure Unity Services are initialized
+                if (!isUnityServicesInitialized)
+                {
+                    Debug.Log("Waiting for Unity Services to initialize...");
+                    await InitializeUnityServicesAsync();
+                }
                 
-                Main.UIMainMenuObject.SetActive(false);
-                Main.UIHostObject.SetActive(true);
-
-                string hostIP = GetLocalIPAddress();
+                Debug.Log("Creating relay allocation...");
                 
-                Main.UIHostPrompt.text = "Invite your friends, with this IP address:";
-                Main.UIHostID.text = $"{hostIP}:7778"; // Show port in display
+                // Create relay allocation for up to 4 players
+                Allocation allocation = await RelayService.Instance.CreateAllocationAsync(4);
+                
+                // Get join code that clients will use
+                string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+                
+                Debug.Log($"Relay allocation created. Join code: {joinCode}");
+                
+                // Configure transport to use relay (convert allocation to RelayServerData)
+                var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+                transport.SetRelayServerData(
+                    allocation.RelayServer.IpV4, 
+                    (ushort)allocation.RelayServer.Port, 
+                    allocation.AllocationIdBytes, 
+                    allocation.Key, 
+                    allocation.ConnectionData
+                );
+                
+                // Start host
+                bool success = NetworkManager.Singleton.StartHost();
+
+                if (success) 
+                {
+                    Main.UIMainMenuObject.SetActive(false);
+                    Main.UIHostObject.SetActive(true);
+
+                    Main.UIHostPrompt.text = "Share this code with friends:";
+                    Main.UIHostID.text = joinCode; // Show join code instead of IP
+                    
+                    Debug.Log($"Host started successfully with join code: {joinCode}");
+                }
+                else
+                {
+                    Debug.LogError("Failed to start host");
+                    // Reset to main menu state
+                    Main.TargetPlayer = null;
+                    Main.CurrentStatus = Status.MainMenu;
+                    Main.UIMainMenuObject.SetActive(true);
+                }
             }
-            else
+            catch (RelayServiceException e)
             {
-                Debug.LogError("Failed to start host. Please try again");
-                // Reset to main menu state
+                Debug.LogError($"Relay service error: {e}");
+                // Reset to main menu on error
                 Main.TargetPlayer = null;
                 Main.CurrentStatus = Status.MainMenu;
                 Main.UIMainMenuObject.SetActive(true);
+            }
+        }
+        
+        private static async System.Threading.Tasks.Task InitializeUnityServicesAsync()
+        {
+            if (isUnityServicesInitialized) return;
+            
+            try
+            {
+                await UnityServices.InitializeAsync();
+                await AuthenticationService.Instance.SignInAnonymouslyAsync();
+                isUnityServicesInitialized = true;
+                Debug.Log("Unity Services initialized successfully");
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError($"Failed to initialize Unity Services: {e}");
+                throw;
             }
         }
 
@@ -98,54 +173,76 @@ namespace Resources.Scripts
             Main.UIMainMenuObject.SetActive(false);
             Main.UIJoinObject.SetActive(true);
             
-            Main.UIJoinPrompt.text = "Input IP address you want to join:";
+            Main.UIJoinPrompt.text = "Enter room code:";
         }
 
-        private static void OnEnterButtonClicked()
+        private static async void OnEnterButtonClicked()
         {
-            
-            // Check if UIInputField exists
-            if (Main.UIInputField == null)
+            try
             {
-                Debug.LogError("UIInputField is null!");
-                return;
+                // Check if UIInputField exists
+                if (Main.UIInputField == null)
+                {
+                    Debug.LogError("UIInputField is null!");
+                    return;
+                }
+                
+                string joinCode = Main.UIInputField.text.Trim();
+                
+                if (string.IsNullOrEmpty(joinCode))
+                {
+                    Debug.LogError("Please enter a room code");
+                    return;
+                }
+                
+                // Ensure Unity Services are initialized
+                if (!isUnityServicesInitialized)
+                {
+                    Debug.Log("Waiting for Unity Services to initialize...");
+                    await InitializeUnityServicesAsync();
+                }
+                
+                // Check NetworkManager
+                if (NetworkManager.Singleton == null)
+                {
+                    Debug.LogError("NetworkManager.Singleton is null!");
+                    return;
+                }
+                
+                Debug.Log($"Attempting to join room with code: {joinCode}");
+                
+                // Join relay allocation using join code
+                JoinAllocation joinAllocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
+                
+                Debug.Log("Successfully joined relay allocation");
+                
+                // Configure transport to use relay (convert joinAllocation to RelayServerData)
+                var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
+                transport.SetRelayServerData(
+                    joinAllocation.RelayServer.IpV4, 
+                    (ushort)joinAllocation.RelayServer.Port, 
+                    joinAllocation.AllocationIdBytes, 
+                    joinAllocation.Key, 
+                    joinAllocation.ConnectionData, 
+                    joinAllocation.HostConnectionData
+                );
+                
+                // Start connection timeout handler
+                Main.Instance.StartCoroutine(ConnectionTimeoutHandler());
+                
+                // Start client
+                bool clientStarted = NetworkManager.Singleton.StartClient();
+                Debug.Log($"StartClient() returned: {clientStarted}");
             }
-            
-            string targetIP = Main.UIInputField.text.Trim();
-            
-            if (string.IsNullOrEmpty(targetIP))
+            catch (RelayServiceException e)
             {
-                Debug.LogError("Please enter an IP address");
-                return;
+                Debug.LogError($"Failed to join relay: {e}");
+                Debug.LogError("Make sure the room code is correct and the host is online.");
             }
-            
-            if (!IsValidIPAddress(targetIP))
+            catch (System.Exception e)
             {
-                Debug.LogError("Invalid IP address format");
-                return;
+                Debug.LogError($"Unexpected error: {e}");
             }
-            
-            // Check NetworkManager
-            if (NetworkManager.Singleton == null)
-            {
-                Debug.LogError("NetworkManager.Singleton is null!");
-                return;
-            }
-            
-            // Set connection and start client (same as before)
-            var transport = NetworkManager.Singleton.GetComponent<Unity.Netcode.Transports.UTP.UnityTransport>();
-            if (transport != null)
-            {
-                transport.SetConnectionData(targetIP, 7778);
-            }
-            else
-            {
-                Debug.LogError("UnityTransport component not found on NetworkManager!");
-                return;
-            }
-            
-            Main.Instance.StartCoroutine(ConnectionTimeoutHandler());
-            NetworkManager.Singleton.StartClient();
         }
 
         private static void OnQuitButtonClicked()
