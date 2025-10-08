@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using UnityEngine;
 using Unity.Netcode;
+using Resources.Scripts.Utility;
 
 namespace Resources.Scripts
 {
@@ -14,9 +15,11 @@ namespace Resources.Scripts
         private float _currentSpeed;
         private Vector3 _directionBuffer;
         private Animator _animator;
+        public Inventory _inventory;
 
         private void Awake()
         { 
+            _inventory = new Inventory();
             _animator = GetComponent<Animator>();
             StartCoroutine(FootprintSpawnTimer());
             return;
@@ -31,12 +34,13 @@ namespace Resources.Scripts
                 } 
             }
         }
-
+        
         private void Update()
         {
             if (!IsOwner) return; // added
             HandleMovement();
             HandleAnimation();
+            HandleInteraction();
         }
 
         private void HandleAnimation()
@@ -66,7 +70,7 @@ namespace Resources.Scripts
         private readonly Vector2 _colliderSize = new (0.55f, 0.35f);   
         private const float SlideToward = 0.06f; // 直接问我
         private const float SlideAlong = 0.03f;
-        private static readonly Collider2D[] ColliderArray = new Collider2D[1];
+        private static readonly Collider2D[] ColliderArray = new Collider2D[8];
         
         private void HandleMovement()
         {
@@ -127,6 +131,41 @@ namespace Resources.Scripts
             }
  
         } 
+    }
+
+    public partial class Character
+    {
+        private void HandleInteraction()
+        {
+            int hitCount = Physics2D.OverlapBoxNonAlloc(transform.position + new Vector3(_colliderOffset.x, _colliderOffset.y, 0), 
+            _colliderSize, 0, ColliderArray, Main.MaskPickable);
+
+            Pickable nearest = null;
+            float nearestSqr = float.MaxValue;
+
+            for (int i = 0; i < hitCount; i++)
+            {
+                var col = ColliderArray[i];
+                if (col == null) continue;
+                if (!col.TryGetComponent<Pickable>(out var pickable)) continue; // not pickable
+
+                float dist = CalculateDistance.SqrDistance(transform.position, pickable.transform.position);
+
+                if (dist < nearestSqr)
+                {
+                    nearest = pickable;
+                    nearestSqr = dist;
+                }
+
+            }
+
+            for (int i = hitCount; i < ColliderArray.Length; i++) ColliderArray[i] = null;
+
+            if (nearest && Input.GetKeyDown(KeyCode.E)) {
+                Debug.Log($"Tried to pick up!");
+                nearest.OnPickedUp(this);
+            }
+        }
     }
 }
 

@@ -5,12 +5,18 @@ using Unity.Services.Authentication;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using Unity.Netcode.Transports.UTP;
+using System;
+using UnityEngine.UI;
 
 namespace Resources.Scripts
 {
     public class UI
     { 
         private static bool isUnityServicesInitialized = false;
+        private static bool isProcessing = false; // prevent multiple trigger on button at once
+        public static event Action onStartPressed; // event for starting the game
+        private static readonly Color StartEnabledColor = Color.white;
+        private static readonly Color StartDisabledColor = new Color(0.6f, 0.6f, 0.6f);
         
         public static void Start()
         {
@@ -18,6 +24,7 @@ namespace Resources.Scripts
             Main.UIJoinButton.onClick.AddListener(OnJoinButtonClicked);
             Main.UIQuitButton.onClick.AddListener(OnQuitButtonClicked);
             Main.UIEnterButton.onClick.AddListener(OnEnterButtonClicked);
+            Main.UIStartButton.onClick.AddListener(OnStartButtonClicked);
 
             // Hide both UI panels initially
             Main.UIHostObject.SetActive(false);
@@ -27,7 +34,7 @@ namespace Resources.Scripts
             InitializeUnityServices();
             
             // Listen for when players connect
-            if (NetworkManager.Singleton != null) // safety check 
+            if (NetworkManager.Singleton) // safety check 
             {
                 NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
                 NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
@@ -71,6 +78,8 @@ namespace Resources.Scripts
                     Debug.LogError("Player object is null.");
                 }
             }
+
+            UpdateStartButtonState();
         }
         
         private static void OnClientDisconnected(ulong clientId)
@@ -84,10 +93,28 @@ namespace Resources.Scripts
                 Main.UIMainMenuObject.SetActive(true);
                 Main.ViewportObject.transform.position = new Vector3(0, 0, -1000);
             }
+
+            else if (NetworkManager.Singleton.IsHost){
+                
+                var network = NetworkManager.Singleton;
+                int connected = network.ConnectedClients != null ? network.ConnectedClients.Count : 0;
+
+                if (connected < 2)
+                {
+                    Main.UIMainMenuObject.SetActive(false);
+                    Main.UIHostObject.SetActive(true);
+                    Main.UIJoinObject.SetActive(false);
+                }
+            }
+
+            UpdateStartButtonState();
         }
 
         private static async void OnHostButtonClicked()
         {
+            if (isProcessing) return;
+            isProcessing = true;
+
             try
             {
                 // Ensure Unity Services are initialized
@@ -124,11 +151,12 @@ namespace Resources.Scripts
                 {
                     Main.UIMainMenuObject.SetActive(false);
                     Main.UIHostObject.SetActive(true);
-
+                    
                     Main.UIHostPrompt.text = "Share this code with friends:";
                     Main.UIHostID.text = joinCode; // Show join code instead of IP
                     
                     Debug.Log($"Host started successfully with join code: {joinCode}");
+                    UpdateStartButtonState();
                 }
                 else
                 {
@@ -146,6 +174,26 @@ namespace Resources.Scripts
                 Main.TargetPlayer = null;
                 Main.CurrentStatus = Status.MainMenu;
                 Main.UIMainMenuObject.SetActive(true);
+            }
+            finally
+            {
+                isProcessing = false;
+            }
+        }
+
+        private static async void OnStartButtonClicked()
+        {
+            if (isProcessing) return;
+            isProcessing = true;
+
+            try
+            {
+                onStartPressed?.Invoke();
+                Main.UIHostObject.SetActive(false);
+            }
+            finally
+            {
+                isProcessing = false;
             }
         }
         
@@ -165,6 +213,27 @@ namespace Resources.Scripts
                 Debug.LogError($"Failed to initialize Unity Services: {e}");
                 throw;
             }
+            finally
+            {
+                isProcessing = false;
+            }
+        }
+
+        private static void UpdateStartButtonState()
+        {
+            if (Main.UIStartButton == null) return;
+
+            bool enable = false;
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsHost)
+            {
+                int connectedClients = NetworkManager.Singleton.ConnectedClients.Count;
+                enable = connectedClients >= 2; // at least 2 players to start
+            }
+
+            Main.UIStartButton.interactable = enable;
+            var colors = Main.UIStartButton.colors;
+            colors.normalColor = enable ? StartEnabledColor : StartDisabledColor;
+            Main.UIStartButton.colors = colors;
         }
 
         private static void OnJoinButtonClicked()
@@ -178,6 +247,9 @@ namespace Resources.Scripts
 
         private static async void OnEnterButtonClicked()
         {
+            if (isProcessing) return;
+            isProcessing = true;
+
             try
             {
                 // Check if UIInputField exists
@@ -242,6 +314,9 @@ namespace Resources.Scripts
             catch (System.Exception e)
             {
                 Debug.LogError($"Unexpected error: {e}");
+            }
+            finally{
+                isProcessing = false;
             }
         }
 

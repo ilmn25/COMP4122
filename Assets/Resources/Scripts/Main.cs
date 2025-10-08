@@ -23,6 +23,7 @@ namespace Resources.Scripts
         public static Light2D SpotLight;
         
         public static LayerMask MaskStatic;
+        public static LayerMask MaskPickable;
 
         // Main Menu UI Components
         public static GameObject UIMainMenuObject;
@@ -35,6 +36,7 @@ namespace Resources.Scripts
         public static Image UITextField;
         public static TextMeshProUGUI UIHostPrompt;
         public static TextMeshProUGUI UIHostID;
+        public static Button UIStartButton;
 
         // Join UI Components
         public static GameObject UIJoinObject;
@@ -51,7 +53,8 @@ namespace Resources.Scripts
             Application.targetFrameRate = 100; // set max fps 
             QualitySettings.vSyncCount = 0;
         
-            MaskStatic  = LayerMask.GetMask("Collide", "Map"); 
+            MaskStatic  = LayerMask.GetMask("Map");
+            MaskPickable = LayerMask.GetMask("Pickable");
             ViewportObject = GameObject.Find("Viewport");
             MainCameraObject = GameObject.Find("MainCamera"); 
             
@@ -66,15 +69,16 @@ namespace Resources.Scripts
 
             // Host UI Components
             UIHostObject = GameObject.Find("HostUI");
-            UITextField = UIHostObject.transform.Find("TextField").GetComponent<Image>();
-            UIHostPrompt = UIHostObject.transform.Find("HostPrompt").GetComponent<TextMeshProUGUI>();
-            UIHostID = UIHostObject.transform.Find("HostID").GetComponent<TextMeshProUGUI>();
+            UITextField = GameObject.Find("TextField").GetComponent<Image>();
+            UIHostPrompt = GameObject.Find("HostPrompt").GetComponent<TextMeshProUGUI>();
+            UIHostID = GameObject.Find("HostID").GetComponent<TextMeshProUGUI>();
+            UIStartButton = GameObject.Find("StartButton").GetComponent<Button>();
 
             // Join UI Components
             UIJoinObject = GameObject.Find("JoinUI");
-            UIJoinPrompt = UIJoinObject.transform.Find("JoinPrompt").GetComponent<TextMeshProUGUI>();
-            UIInputField = UIJoinObject.transform.Find("InputField").GetComponent<TMP_InputField>();
-            UIEnterButton = UIJoinObject.transform.Find("EnterButton").GetComponent<Button>();
+            UIJoinPrompt = GameObject.Find("JoinPrompt").GetComponent<TextMeshProUGUI>();
+            UIInputField = GameObject.Find("InputField").GetComponent<TMP_InputField>();
+            UIEnterButton = GameObject.Find("EnterButton").GetComponent<Button>();
 
             // 直接吧所有object之类放这里，像一个字典那样，因为如果直接public，然后drag and drop然后后边要搬或copypaste然后reference断了就超烦
             // 所以要找object时当Main做字典用吧 （Main.TargetPlayer.transform.position) 那样
