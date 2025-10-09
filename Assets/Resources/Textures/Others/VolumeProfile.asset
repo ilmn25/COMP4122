@@ -15,7 +15,7 @@ MonoBehaviour:
   active: 1
   intensity:
     m_OverrideState: 1
-    m_Value: 0.25
+    m_Value: 0.33
   xMultiplier:
     m_OverrideState: 0
     m_Value: 1
@@ -26,7 +26,7 @@ MonoBehaviour:
     m_OverrideState: 0
     m_Value: {x: 0.5, y: 0.5}
   scale:
-    m_OverrideState: 0
+    m_OverrideState: 1
     m_Value: 1
 --- !u!114 &-5040340803712768174
 MonoBehaviour:
@@ -43,7 +43,7 @@ MonoBehaviour:
   active: 1
   intensity:
     m_OverrideState: 1
-    m_Value: 0.504
+    m_Value: 0.308
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61,6 +61,7 @@ MonoBehaviour:
   - {fileID: 8447731653387834465}
   - {fileID: -8659733456679399229}
   - {fileID: 6390981115807513930}
+  - {fileID: 7389672010582874148}
 --- !u!114 &6390981115807513930
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -89,6 +90,53 @@ MonoBehaviour:
   rounded:
     m_OverrideState: 0
     m_Value: 0
+--- !u!114 &7389672010582874148
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0b2db86121404754db890f4c8dfe81b2, type: 3}
+  m_Name: Bloom
+  m_EditorClassIdentifier: 
+  active: 1
+  skipIterations:
+    m_OverrideState: 0
+    m_Value: 1
+  threshold:
+    m_OverrideState: 1
+    m_Value: 0.21
+  intensity:
+    m_OverrideState: 1
+    m_Value: 3.49
+  scatter:
+    m_OverrideState: 1
+    m_Value: 0.572
+  clamp:
+    m_OverrideState: 1
+    m_Value: 0.6
+  tint:
+    m_OverrideState: 1
+    m_Value: {r: 0.3018868, g: 0.23780705, b: 0.28186187, a: 1}
+  highQualityFiltering:
+    m_OverrideState: 0
+    m_Value: 0
+  downscale:
+    m_OverrideState: 0
+    m_Value: 0
+  maxIterations:
+    m_OverrideState: 0
+    m_Value: 6
+  dirtTexture:
+    m_OverrideState: 0
+    m_Value: {fileID: 0}
+    dimension: 1
+  dirtIntensity:
+    m_OverrideState: 0
+    m_Value: 0
 --- !u!114 &8447731653387834465
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -104,7 +152,7 @@ MonoBehaviour:
   active: 1
   type:
     m_OverrideState: 1
-    m_Value: 2
+    m_Value: 3
   intensity:
     m_OverrideState: 1
     m_Value: 1
