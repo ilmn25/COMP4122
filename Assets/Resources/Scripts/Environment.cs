@@ -75,8 +75,8 @@ namespace Resources.Scripts
             Dictionary.Add(EnvPreset.Night, new Environment
             {
                 _ambientColor = GetColor(14, 11, 79),
-                _spotLightColor = GetColor(0, 16, 79),
-                _spotLightIntensity = 3
+                _spotLightColor = GetColor(14, 7, 61),
+                _spotLightIntensity = 5 
             });
             Dictionary.Add(EnvPreset.Day, new Environment
             {
