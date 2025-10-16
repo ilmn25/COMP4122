@@ -23,6 +23,8 @@ namespace Resources.Scripts
         public static Light2D SpotLight;
         
         public static LayerMask MaskStatic;
+        
+        public static GameObject HUDObject;
 
         // Main Menu UI Components
         public static GameObject UIMainMenuObject;
@@ -58,6 +60,7 @@ namespace Resources.Scripts
             AmbientLight = GameObject.Find("AmbientLight").GetComponent<Light2D>();
             SpotLight = GameObject.Find("SpotLight").GetComponent<Light2D>(); 
 
+            HUDObject = GameObject.Find("HUD");
             // Main Menu UI Components
             UIMainMenuObject = GameObject.Find("MainMenu");
             UIHostButton = GameObject.Find("HostButton").GetComponent<Button>();
