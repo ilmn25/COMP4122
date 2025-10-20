@@ -1,38 +1,46 @@
+using System;
+using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Resources.Scripts
 {
-    public class SurvivorHealth : MonoBehaviour
+    public partial class Character
     {
-        [Header("血量设置")]
-        public int maxHealth = 3;
-        public int currentHealth;
-        public bool isDead = false;
+        [NonSerialized] public readonly int MaxHealth = 3;
+        [NonSerialized] private readonly NetworkVariable<int> _currentHealth = new ();
+
+        public int CurrentHealth
+        {
+            get => _currentHealth.Value;
+            set => _currentHealth.Value = value;
+        }
+
+        public bool isDead;
 
         private void Start()
         {
-            currentHealth = maxHealth;
+            CurrentHealth = MaxHealth;
             isDead = false;
         
-            HUD.InitializeHealth(maxHealth);
-            HUD.UpdateHealth(currentHealth);
+            HUD.InitializeHealth();
+            HUD.UpdateHealth();
         }
 
         public void TakeDamage(int damageAmount = 1)
         {
-            if (isDead || currentHealth <= 0)
+            if (isDead || CurrentHealth <= 0)
                 return;
         
-            currentHealth -= damageAmount;
+            CurrentHealth -= damageAmount;
         
-            HUD.UpdateHealth(currentHealth);
+            HUD.UpdateHealth();
         
-            if (currentHealth <= 0)
+            if (CurrentHealth <= 0)
             {
                 isDead = true;
-                currentHealth = 0;
         
-                HUD.UpdateHealth(0);
+                HUD.UpdateHealth();
                 Main.CurrentStatus = Status.MainMenu;
             }
         } 
