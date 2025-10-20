@@ -97,7 +97,6 @@ GameObject:
   - component: {fileID: 3721211435008668438}
   - component: {fileID: 5689927168927177131}
   - component: {fileID: -3791534867289893714}
-  - component: {fileID: 3254307333013685715}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -154,6 +153,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 151f460417e8fa047a4f496160c76cfc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isDead: 0
 --- !u!95 &5689927168927177131
 Animator:
   serializedVersion: 5
@@ -206,18 +206,3 @@ MonoBehaviour:
   InLocalSpace: 0
   Interpolate: 1
   SlerpPosition: 0
---- !u!114 &3254307333013685715
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5353503658278229443}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 98ea8288e499af54f8962674aaa0b3d7, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxHealth: 3
-  currentHealth: 3
-  isDead: 0

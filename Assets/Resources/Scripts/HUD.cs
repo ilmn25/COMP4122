@@ -7,18 +7,17 @@ namespace Resources.Scripts
     public class HUD
     { 
         private static readonly List<Image> HealthImages = new List<Image>();
-
-        public static void InitializeHealth(int maxHealth)
+        private static int MaxHealth => Main.TargetPlayer.MaxHealth; 
+        private static int CurrentHealth => Main.TargetPlayer.CurrentHealth; 
+        public static void InitializeHealth()
         {
-            Debug.Log($"初始化血量显示: {maxHealth}颗心");
             ClearHealthDisplay();
-            for (int i = 0; i < maxHealth; i++)
+            for (int i = 0; i < MaxHealth; i++)
             {
                 CreateHealthImage();
             }
         
-            UpdateHealth(maxHealth);
-            Debug.Log($"血量显示初始化完成，创建了{HealthImages.Count}颗心");
+            UpdateHealth();
         }
     
         private static void ClearHealthDisplay()
@@ -32,16 +31,16 @@ namespace Resources.Scripts
     
         private static void CreateHealthImage()
         {
-            GameObject obj = GameObject.Instantiate(UnityEngine.Resources.Load<GameObject>("Prefabs/heart"),
+            GameObject obj = GameObject.Instantiate(UnityEngine.Resources.Load<GameObject>("Prefabs/Heart"),
                 Main.HUDObject.transform);
             HealthImages.Add(obj.GetComponent<Image>());
         }
     
-        public static void UpdateHealth(int currentHealth)
+        public static void UpdateHealth()
         {
             for (int i = 0; i < HealthImages.Count; i++)
             {
-                HealthImages[i].sprite = i < currentHealth ? Cache.LoadSprite("Heart") : Cache.LoadSprite("Icon");
+                HealthImages[i].sprite = i < CurrentHealth ? Cache.LoadSprite("Heart") : Cache.LoadSprite("Icon");
             }
         }
     }
