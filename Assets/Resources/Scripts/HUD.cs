@@ -6,7 +6,7 @@ namespace Resources.Scripts
 {
     public class HUD
     { 
-        private static readonly List<Image> HealthImages = new List<Image>();
+        private static readonly List<Image> HealthImages = new ();
         private static int MaxHealth => Main.TargetPlayer.MaxHealth; 
         private static int CurrentHealth => Main.TargetPlayer.CurrentHealth; 
         public static void InitializeHealth()
@@ -24,14 +24,14 @@ namespace Resources.Scripts
         {
             foreach (Image healthImage in HealthImages)
             {
-                GameObject.Destroy(healthImage.gameObject);
+                Object.Destroy(healthImage.gameObject);
             }
             HealthImages.Clear();
         }
     
         private static void CreateHealthImage()
         {
-            GameObject obj = GameObject.Instantiate(UnityEngine.Resources.Load<GameObject>("Prefabs/Heart"),
+            GameObject obj = Object.Instantiate(UnityEngine.Resources.Load<GameObject>("Prefabs/Heart"),
                 Main.HUDObject.transform);
             HealthImages.Add(obj.GetComponent<Image>());
         }

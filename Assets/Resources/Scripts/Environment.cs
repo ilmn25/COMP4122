@@ -8,7 +8,8 @@ namespace Resources.Scripts
 {
     public enum EnvPreset
     {
-        BlackScreen, Night, Day
+        BlackScreen, Night, Day,
+        Purple
     }
     
     public partial class Environment    
@@ -72,11 +73,17 @@ namespace Resources.Scripts
                 _spotLightColor = Color.black,
                 _spotLightIntensity = 1
             });
-            Dictionary.Add(EnvPreset.Night, new Environment
+            Dictionary.Add(EnvPreset.Purple, new Environment
             {
                 _ambientColor = GetColor(14, 11, 79),
                 _spotLightColor = GetColor(14, 7, 61),
                 _spotLightIntensity = 5 
+            });
+            Dictionary.Add(EnvPreset.Night, new Environment
+            {
+                _ambientColor = GetColor(3, 2, 14),
+                _spotLightColor = GetColor(11, 29, 60),
+                _spotLightIntensity = 2 
             });
             Dictionary.Add(EnvPreset.Day, new Environment
             {

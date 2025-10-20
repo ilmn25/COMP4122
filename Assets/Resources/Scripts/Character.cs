@@ -8,16 +8,16 @@ namespace Resources.Scripts
 {
     public partial class Character : NetworkBehaviour
     {
-        public NetworkVariable<Vector2> direction = new (
+        private readonly NetworkVariable<Vector2> _direction = new (
             writePerm: NetworkVariableWritePermission.Owner
         );
         public Vector2 Direction
         {
-            get => direction.Value;
-            set { if (IsOwner) direction.Value = value; }
+            get => _direction.Value;
+            set { if (IsOwner) _direction.Value = value; }
         }
         
-        private NetworkVariable<float> _currentSpeed = new (
+        private readonly NetworkVariable<float> _currentSpeed = new (
             writePerm: NetworkVariableWritePermission.Owner
         );
 
@@ -27,7 +27,7 @@ namespace Resources.Scripts
             set { if (IsOwner) _currentSpeed.Value = value; }
         }
 
-        private const int Speed = 5;
+        private const int Speed = 4;
         private const int Acceleration = 5;
         private const int Deceleration = 3; 
         private Vector3 _directionBuffer;
@@ -82,8 +82,8 @@ namespace Resources.Scripts
     }
     public partial class Character //everything collision and movement related
     {
-        private readonly Vector2 _colliderOffset = new (0, 0.3f);
-        private readonly Vector2 _colliderSize = new (0.55f, 0.35f);   
+        private readonly Vector2 _colliderOffset = new (0, 0.25f);
+        private readonly Vector2 _colliderSize = new (0.55f, 0.45f);   
         private const float SlideToward = 0.06f; // 直接问我
         private const float SlideAlong = 0.03f;
         private static readonly Collider2D[] ColliderArray = new Collider2D[1];
