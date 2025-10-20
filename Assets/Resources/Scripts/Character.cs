@@ -2,16 +2,34 @@ using System;
 using System.Collections;
 using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.Serialization;
 
 namespace Resources.Scripts
 {
     public partial class Character : NetworkBehaviour
     {
-        [NonSerialized] public Vector2 Direction; 
+        public NetworkVariable<Vector2> direction = new (
+            writePerm: NetworkVariableWritePermission.Owner
+        );
+        public Vector2 Direction
+        {
+            get => direction.Value;
+            set { if (IsOwner) direction.Value = value; }
+        }
+        
+        private NetworkVariable<float> _currentSpeed = new (
+            writePerm: NetworkVariableWritePermission.Owner
+        );
+
+        private float CurrentSpeed
+        {
+            get => _currentSpeed.Value;
+            set { if (IsOwner) _currentSpeed.Value = value; }
+        }
+
         private const int Speed = 5;
         private const int Acceleration = 5;
-        private const int Deceleration = 3;
-        private float _currentSpeed;
+        private const int Deceleration = 3; 
         private Vector3 _directionBuffer;
         private Animator _animator;
 
@@ -26,7 +44,7 @@ namespace Resources.Scripts
                 while (true)
                 {
                     yield return new WaitForSeconds(0.3f);
-                    if (_currentSpeed > 0.1f)
+                    if (CurrentSpeed > 0.1f)
                     {
                         ObjectPool.GetObject(ID.Footprint).transform.position = transform.position;
                         Audio.PlaySfx(UnityEngine.Random.Range(0,2) == 0? AudioClipID.Footsteps1 : AudioClipID.Footsteps2);
@@ -37,8 +55,7 @@ namespace Resources.Scripts
 
         private void Update()
         {
-            if (!IsOwner) return; // added
-            HandleMovement();
+            if (IsOwner) HandleMovement(); 
             HandleAnimation();
         }
 
@@ -48,7 +65,7 @@ namespace Resources.Scripts
 
             if (isMoving)
             {
-                _animator.speed = _currentSpeed / Speed;
+                _animator.speed = CurrentSpeed / Speed;
                 _animator.Play("Move", 0);  
             }
             else
@@ -57,7 +74,7 @@ namespace Resources.Scripts
                 _animator.Play("Idle", 0);
             }
 
-            if (Direction.x < 0)    
+            if (Direction.x < 0)
                 _animator.Play("Left", 1); 
             else if (Direction.x > 0)
                 _animator.Play("Right", 1);
@@ -76,15 +93,15 @@ namespace Resources.Scripts
             if (Direction != Vector2.zero)
             {
                 float speedAdjust = Direction.x != 0 && Direction.y != 0 ? Speed * 0.7071f : Speed;
-                _currentSpeed = Mathf.Lerp(_currentSpeed, speedAdjust, Time.fixedDeltaTime * Acceleration);
-                _directionBuffer =  new Vector3(Direction.x, Direction.y, 0); // deceleration in previous frame's direction
+                CurrentSpeed = Mathf.Lerp(CurrentSpeed, speedAdjust, Time.fixedDeltaTime * Acceleration);
+                _directionBuffer =  new Vector3(Direction.x, Direction.y, 0); // deceleration in previous frame's Direction
             }
             else
             {
-                _currentSpeed = Mathf.Lerp(_currentSpeed, 0, Time.fixedDeltaTime * Deceleration);
+                CurrentSpeed = Mathf.Lerp(CurrentSpeed, 0, Time.fixedDeltaTime * Deceleration);
             }
             
-            transform.position = GetNonCollidePosition(transform.position + _directionBuffer * (Time.deltaTime * _currentSpeed)); 
+            transform.position = GetNonCollidePosition(transform.position + _directionBuffer * (Time.deltaTime * CurrentSpeed)); 
             return;
             
             bool IsNotCollide(Vector2 pos)

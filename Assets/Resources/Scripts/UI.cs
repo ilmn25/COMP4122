@@ -125,7 +125,6 @@ namespace Resources.Scripts
                     Main.UIMainMenuObject.SetActive(false);
                     Main.UIHostObject.SetActive(true);
 
-                    Main.UIHostPrompt.text = "Share this code with friends:";
                     Main.UIHostID.text = joinCode; // Show join code instead of IP
                     
                     Debug.Log($"Host started successfully with join code: {joinCode}");
