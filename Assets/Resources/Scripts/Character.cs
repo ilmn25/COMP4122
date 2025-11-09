@@ -82,8 +82,8 @@ namespace Resources.Scripts
     }
     public partial class Character //everything collision and movement related
     {
-        private readonly Vector2 _colliderOffset = new (0, 0.25f);
-        private readonly Vector2 _colliderSize = new (0.55f, 0.45f);   
+        private readonly Vector2 _colliderOffset = new (0, 0.2f);
+        private readonly Vector2 _colliderSize = new (0.55f, 0.55f);   
         private const float SlideToward = 0.06f; // 直接问我
         private const float SlideAlong = 0.03f;
         private static readonly Collider2D[] ColliderArray = new Collider2D[1];
@@ -106,7 +106,7 @@ namespace Resources.Scripts
             
             bool IsNotCollide(Vector2 pos)
             {
-                return Physics2D.OverlapBoxNonAlloc(pos + _colliderOffset, _colliderSize, 0, ColliderArray, Main.MaskStatic) == 0; 
+                return Physics2D.OverlapBoxNonAlloc(pos + _colliderOffset, _colliderSize, 0, ColliderArray, Main.MaskCollide) == 0; 
             }
             
             Vector3 GetNonCollidePosition(Vector3 targetPos)

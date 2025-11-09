@@ -23,6 +23,8 @@ namespace Resources.Scripts
         public static Light2D SpotLight;
         
         public static LayerMask MaskStatic;
+        public static LayerMask MaskSemi;
+        public static LayerMask MaskCollide;
         
         public static GameObject HUDObject;
 
@@ -53,7 +55,9 @@ namespace Resources.Scripts
             Application.targetFrameRate = 100; // set max fps 
             QualitySettings.vSyncCount = 0;
         
-            MaskStatic  = LayerMask.GetMask("Collide", "Map"); 
+            MaskStatic  = LayerMask.GetMask( "Map", "Semi"); 
+            MaskCollide  = LayerMask.GetMask( "Map"); 
+            MaskSemi  = LayerMask.GetMask("Semi"); 
             ViewportObject = GameObject.Find("Viewport");
             MainCameraObject = GameObject.Find("MainCamera"); 
             
