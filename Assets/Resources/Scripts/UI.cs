@@ -6,12 +6,18 @@ using Unity.Services.Authentication;
 using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using Unity.Netcode.Transports.UTP;
+using System;
+using UnityEngine.UI;
 
 namespace Resources.Scripts
 {
     public static partial class UI
     { 
         private static bool _isUnityServicesInitialized;
+        private static bool _isProcessing = false; // prevent multiple trigger on button at once
+        public static event Action OnStartPressed; // event for starting the game
+        private static readonly Color StartEnabledColor = Color.white;
+        private static readonly Color StartDisabledColor = new Color(0.6f, 0.6f, 0.6f);
         
         public static void Start()
         {
@@ -19,6 +25,7 @@ namespace Resources.Scripts
             Main.UIJoinButton.onClick.AddListener(OnJoinButtonClicked);
             Main.UIQuitButton.onClick.AddListener(OnQuitButtonClicked);
             Main.UIEnterButton.onClick.AddListener(OnEnterButtonClicked);
+            Main.UIStartButton.onClick.AddListener(OnStartButtonClicked);
 
             // Hide both UI panels initially
             Main.UIHostObject.SetActive(false);
@@ -28,6 +35,11 @@ namespace Resources.Scripts
             InitializeUnityServices();
             
             // Listen for when players connect
+            if (NetworkManager.Singleton) // safety check 
+            {
+                NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+                NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+            }
             NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
             NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
         }
@@ -67,6 +79,8 @@ namespace Resources.Scripts
                     Debug.LogError("Player object is null.");
                 }
             }
+
+            UpdateStartButtonState();
         }
         
         private static void OnClientDisconnected(ulong clientId)
@@ -80,59 +94,77 @@ namespace Resources.Scripts
                 Main.UIMainMenuObject.SetActive(true);
                 Main.ViewportObject.transform.position = new Vector3(0, 0, -1000);
             }
+
+            else if (NetworkManager.Singleton.IsHost){
+                
+                var network = NetworkManager.Singleton;
+                int connected = network.ConnectedClients != null ? network.ConnectedClients.Count : 0;
+
+                if (connected < 2)
+                {
+                    Main.UIMainMenuObject.SetActive(false);
+                    Main.UIHostObject.SetActive(true);
+                    Main.UIJoinObject.SetActive(false);
+                }
+            }
+
+            UpdateStartButtonState();
         }
 
         private static void OnHostButtonClicked()
         {
+            if (_isProcessing) return;
+            _isProcessing = true;
             CoroutineTask task = new CoroutineTask(Slide(false, 0f, Main.UIMainMenuObject, new Vector3(0, -10, 0)));
             task.Finished += _ =>
             {
                 HostGame();
             };
             return;
-
+            
             async void HostGame()
             {
                 try
-                { 
+                {
                     // Ensure Unity Services are initialized
                     if (!_isUnityServicesInitialized)
                     {
                         Debug.Log("Waiting for Unity Services to initialize...");
                         await InitializeUnityServicesAsync();
                     }
-                    
+
                     Debug.Log("Creating relay allocation...");
-                    
+
                     // Create relay allocation for up to 4 players
                     Allocation allocation = await RelayService.Instance.CreateAllocationAsync(4);
-                    
+
                     // Get join code that clients will use
                     string joinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
-                    
+
                     Debug.Log($"Relay allocation created. Join code: {joinCode}");
-                    
+
                     // Configure transport to use relay (convert allocation to RelayServerData)
                     var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
                     transport.SetRelayServerData(
-                        allocation.RelayServer.IpV4, 
-                        (ushort)allocation.RelayServer.Port, 
-                        allocation.AllocationIdBytes, 
-                        allocation.Key, 
+                        allocation.RelayServer.IpV4,
+                        (ushort)allocation.RelayServer.Port,
+                        allocation.AllocationIdBytes,
+                        allocation.Key,
                         allocation.ConnectionData
                     );
-                    
+
                     // Start host
                     bool success = NetworkManager.Singleton.StartHost();
 
-                    if (success) 
+                    if (success)
                     {
                         Main.UIMainMenuObject.SetActive(false);
                         Main.UIHostObject.SetActive(true);
-
+ 
                         Main.UIHostID.text = joinCode; // Show join code instead of IP
-                        
+
                         Debug.Log($"Host started successfully with join code: {joinCode}");
+                        UpdateStartButtonState();
                     }
                     else
                     {
@@ -151,9 +183,31 @@ namespace Resources.Scripts
                     Main.CurrentStatus = Status.MainMenu;
                     Main.UIMainMenuObject.SetActive(true);
                 }
+                finally
+                {
+                    _isProcessing = false;
+                }
+            }
+        }
+
+
+
+        private static async void OnStartButtonClicked()
+        {
+            if (_isProcessing) return;
+            _isProcessing = true;
+
+            try
+            {
+                OnStartPressed?.Invoke();
+                Main.UIHostObject.SetActive(false);
+            }
+            finally
+            {
+                _isProcessing = false;
             } 
         }
-        
+
         private static async System.Threading.Tasks.Task InitializeUnityServicesAsync()
         {
             if (_isUnityServicesInitialized) return;
@@ -170,6 +224,27 @@ namespace Resources.Scripts
                 Debug.LogError($"Failed to initialize Unity Services: {e}");
                 throw;
             }
+            finally
+            {
+                _isProcessing = false;
+            }
+        }
+
+        private static void UpdateStartButtonState()
+        {
+            if (Main.UIStartButton == null) return;
+
+            bool enable = false;
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsHost)
+            {
+                int connectedClients = NetworkManager.Singleton.ConnectedClients.Count;
+                enable = connectedClients >= 2; // at least 2 players to start
+            }
+
+            Main.UIStartButton.interactable = enable;
+            var colors = Main.UIStartButton.colors;
+            colors.normalColor = enable ? StartEnabledColor : StartDisabledColor;
+            Main.UIStartButton.colors = colors;
         }
 
         private static void OnJoinButtonClicked()
@@ -183,6 +258,9 @@ namespace Resources.Scripts
 
         private static async void OnEnterButtonClicked()
         {
+            if (_isProcessing) return;
+            _isProcessing = true;
+
             try
             {
                 // Ensure Unity Services are initialized
@@ -215,6 +293,9 @@ namespace Resources.Scripts
             catch (System.Exception e)
             {
                 Debug.LogError($"Unexpected error: {e}");
+            }
+            finally{
+                _isProcessing = false;
             }
         }
 
