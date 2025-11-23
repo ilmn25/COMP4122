@@ -6,14 +6,8 @@ using Random = UnityEngine.Random;
 
 public class NetworkSpawner : NetworkBehaviour
 {
-
     [Header("Spawn Database")]
     public SpawnDatabase spawnDatabase;
-
-    private GameObject prefab;
-    private int minCount;
-    private int maxCount;
-    private List<Vector3> spawnPoints;
 
     [Header("Spawn Bound")]
     public BoxCollider2D spawnArea;
@@ -25,25 +19,19 @@ public class NetworkSpawner : NetworkBehaviour
     [Header("Collision Handling")]
     public Vector2 spawnTestBoxSize = new Vector2(0.6f, 0.6f);
     public LayerMask obstacleLayer; // for walls
-    public int overlapBufferSize = 16; // increased pickable distance
-    private Collider2D[] _overlapBuffer;
+    public int overlapBufferSize = 16; // increased pickable distance 
 
     public int maxAttempts = 20;
-
-    void Awake()
-    {
-        _overlapBuffer = new Collider2D[overlapBufferSize];
-    }
+ 
     
 
     // Listen for start game event from UI
-    void OnEnable() => UI.OnStartPressed += SpawnAll;
-    void OnDisable() => UI.OnStartPressed -= SpawnAll;
+    void OnEnable() => UI.OnBegin += SpawnAll;
+    void OnDisable() => UI.OnBegin -= SpawnAll;
 
     void SpawnAll(){
 
         if (!IsServer) return;
-        if (spawnDatabase == null || spawnDatabase.entries == null) return;
 
         foreach (var prefab in spawnDatabase.entries)
         {
@@ -57,20 +45,17 @@ public class NetworkSpawner : NetworkBehaviour
     void SpawnObjects(GameObject prefab, Spawnable spawnable)
     {
         List<Vector3> spawnPoints = spawnable.spawnPoints;
-        int min = Mathf.Max(0, spawnable.minCount); // for safety
-        int max = Mathf.Max(min, spawnable.maxCount);
-        int count = Random.Range(min, max + 1);
-        if (count == 0) return;
+        int amount = Random.Range(spawnable.minCount, spawnable.maxCount + 1);
 
-        List<Vector3> spawned = new List<Vector3>();
+        List<Vector3> spawnedObjs = new List<Vector3>();
 
         float minSqr = minDistanceBetween * minDistanceBetween;
         float minPlayerSqr = minDistanceFromPlayers * minDistanceFromPlayers;
 
         // 1. If inspector spawn points exist
-        if (spawnPoints != null && spawnPoints.Count > 0 )
+        if (spawnPoints.Count > 0 )
         {
-            int num = Mathf.Min(count, spawnPoints.Count); // limit to available points
+            int num = Mathf.Min(amount, spawnPoints.Count); // limit to available points
 
             int[] idx = new int[spawnPoints.Count];
             for(int i = 0; i < spawnPoints.Count; i++) idx[i] = i;
@@ -79,31 +64,27 @@ public class NetworkSpawner : NetworkBehaviour
             for(int i = 0; i < num; i++)
             {
                 int r = Random.Range(i, spawnPoints.Count);
-                int tmp = idx[i]; idx[i] = idx[r]; idx[r] = tmp;
+                (idx[i], idx[r]) = (idx[r], idx[i]);
 
                 Vector3 pos = spawnPoints[idx[i]];
 
                 // Skip if overlapping with others or close to player
-                if (!IsClearByOverlap(pos)) continue;
-                if (IsTooCloseToPlayers(pos, minPlayerSqr)) continue;
+                if (IsOverlap(pos)) continue;
+                if (IsNearPlayer(pos, minPlayerSqr)) continue;
                 
-                if (minDistanceBetween > 0f)
+                bool tooClose = false;
+                foreach (var item in spawnedObjs)
                 {
-                    bool tooClose = false;
-                    for (int j = 0; j < spawned.Count; j++)
-                    {
-                        if ((spawned[j] - pos).sqrMagnitude < minSqr) { tooClose = true; break; }
+                    if ((item - pos).sqrMagnitude < minSqr)
+                    { 
+                        tooClose = true;  
+                        break;
                     }
-                    if (tooClose) continue;
-                    
                 }
+                if (tooClose) continue;
 
-    
-                GameObject obj = GameObject.Instantiate(prefab, pos, Quaternion.identity);
-                NetworkObject net = obj.GetComponent<NetworkObject>();
-                if (net != null) net.Spawn();
-
-                spawned.Add(pos);
+                Instantiate(prefab, pos, Quaternion.identity).GetComponent<NetworkObject>().Spawn();
+                spawnedObjs.Add(pos);
             }
 
             return;
@@ -116,7 +97,7 @@ public class NetworkSpawner : NetworkBehaviour
         float zPos = bound.center.z;
 
         int attempts = 0;
-        while (spawned.Count < count && attempts < maxAttempts)
+        while (spawnedObjs.Count < amount && attempts < maxAttempts)
         {
             attempts++;
 
@@ -126,61 +107,57 @@ public class NetworkSpawner : NetworkBehaviour
                 zPos
             );
 
-            if (!IsClearByOverlap(pos)) continue;
-            if (IsTooCloseToPlayers(pos, minPlayerSqr)) continue;
+            if (IsOverlap(pos)) continue;
+            if (IsNearPlayer(pos, minPlayerSqr)) continue;
 
             if (minDistanceBetween > 0f)
             {
                 bool tooClose = false;
-                for (int i = 0; i < spawned.Count; i++)
+                foreach (var t in spawnedObjs)
                 {
-                    if ((spawned[i] - pos).sqrMagnitude < minSqr) { tooClose = true; break; }
+                    if ((t - pos).sqrMagnitude < minSqr) { tooClose = true; break; }
                 }
                 if (tooClose) continue;
             }
 
-            GameObject obj = GameObject.Instantiate(prefab, pos, Quaternion.identity);
-            NetworkObject net = obj.GetComponent<NetworkObject>();
-            if (net != null) net.Spawn();
-
-            spawned.Add(pos);
+            Instantiate(prefab, pos, Quaternion.identity).GetComponent<NetworkObject>().Spawn();
+            spawnedObjs.Add(pos);
         }
-
-        return;
     }
 
-    bool IsClearByOverlap(Vector3 pos)
+    bool IsOverlap(Vector3 pos)
     {
+        Collider2D[] overlapBuffer = new Collider2D[overlapBufferSize];
         Vector2 center = new Vector2(pos.x, pos.y);
 
-        if ((int)obstacleLayer != 0)
+        if (obstacleLayer != 0)
         {
-            int foundLayer = Physics2D.OverlapBoxNonAlloc(center, spawnTestBoxSize, 0f, _overlapBuffer, (int)obstacleLayer);
+            int foundLayer = Physics2D.OverlapBoxNonAlloc(center, spawnTestBoxSize, 0f, overlapBuffer, obstacleLayer);
             if (foundLayer > 0)
             {
                 // any collider returned on obstacleLayer blocks spawn
-                return false;
+                return true;
             }
         }
 
-        int foundAll = Physics2D.OverlapBoxNonAlloc(center, spawnTestBoxSize, 0f, _overlapBuffer, ~0);
+        int foundAll = Physics2D.OverlapBoxNonAlloc(center, spawnTestBoxSize, 0f, overlapBuffer, ~0);
         
         if (foundAll > 0)
         {
             for (int i = 0; i < foundAll; i++)
             {
-                var c = _overlapBuffer[i];
+                var c = overlapBuffer[i];
                 if (c == null) continue;
                 
-                if (c.TryGetComponent<Pickable>(out _)) return false; // object detected is pickable
+                if (c.TryGetComponent<Interactable>(out _)) return true; // object detected is pickable
 
             }
         }
 
-        return true;
+        return false;
     }
 
-    bool IsTooCloseToPlayers(Vector3 pos, float minPlayerSqr)
+    bool IsNearPlayer(Vector3 pos, float minPlayerSqr)
     {
         if (minDistanceFromPlayers <= 0f || NetworkManager.Singleton == null) return false;
 

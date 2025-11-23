@@ -160,14 +160,14 @@ namespace Resources.Scripts
             int hitCount = Physics2D.OverlapBoxNonAlloc(transform.position + new Vector3(_colliderOffset.x, _colliderOffset.y, 0), 
             _colliderSize, 0, ColliderArray, Main.MaskPickable);
 
-            Pickable nearest = null;
+            Interactable nearest = null;
             float nearestSqr = float.MaxValue;
 
             for (int i = 0; i < hitCount; i++)
             {
                 var col = ColliderArray[i];
-                if (col == null) continue;
-                if (!col.TryGetComponent<Pickable>(out var pickable)) continue; // not pickable
+                if (!col) continue;
+                if (!col.TryGetComponent<Interactable>(out var pickable)) continue; // not pickable
 
                 float dist = CalculateDistance.SqrDistance(transform.position, pickable.transform.position);
 

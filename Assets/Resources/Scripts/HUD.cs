@@ -4,43 +4,29 @@ using UnityEngine.UI;
 
 namespace Resources.Scripts
 {
-    public class HUD
+    public class HUD : MonoBehaviour
     { 
         private static readonly List<Image> HealthImages = new ();
-        private static int MaxHealth => Main.TargetPlayer.MaxHealth; 
         private static int CurrentHealth => Main.TargetPlayer.CurrentHealth; 
-        public static void InitializeHealth()
-        {
-            ClearHealthDisplay();
-            for (int i = 0; i < MaxHealth; i++)
-            {
-                CreateHealthImage();
-            }
+        private static int MaxHealth => Main.TargetPlayer.MaxHealth; 
         
-            UpdateHealth();
-        }
-    
-        private static void ClearHealthDisplay()
+        public void Awake()
         {
-            foreach (Image healthImage in HealthImages)
+            for (int i = 0; i < 5; i++) CreateHealthIcon(); 
+            void CreateHealthIcon()
             {
-                Object.Destroy(healthImage.gameObject);
+                GameObject obj = Instantiate(UnityEngine.Resources.Load<GameObject>("Prefabs/HeartHUD"), transform);
+                HealthImages.Add(obj.GetComponent<Image>());
             }
-            HealthImages.Clear();
-        }
-    
-        private static void CreateHealthImage()
-        {
-            GameObject obj = Object.Instantiate(UnityEngine.Resources.Load<GameObject>("Prefabs/Heart"),
-                Main.HUDObject.transform);
-            HealthImages.Add(obj.GetComponent<Image>());
         }
     
         public static void UpdateHealth()
         {
             for (int i = 0; i < HealthImages.Count; i++)
             {
-                HealthImages[i].sprite = i < CurrentHealth ? Cache.LoadSprite("Heart") : Cache.LoadSprite("Icon");
+                if (i < CurrentHealth) HealthImages[i].sprite = Cache.LoadSprite("HeartFull");
+                else if (i < MaxHealth) HealthImages[i].sprite = Cache.LoadSprite("HeartEmpty");
+                else HealthImages[i].sprite = Cache.LoadSprite("Empty");
             }
         }
     }

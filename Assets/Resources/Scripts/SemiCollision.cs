@@ -16,7 +16,6 @@ namespace Resources.Scripts
         {
             CircleCollider2D circleCollider = gameObject.GetComponent<CircleCollider2D>();
             _offset = circleCollider.offset;
-            Debug.Log(_offset);
             _radius = circleCollider.radius;
         }
 

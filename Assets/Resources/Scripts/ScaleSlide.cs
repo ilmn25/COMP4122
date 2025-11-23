@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace Resources.Scripts
 {
-    public static partial class UI
+    public partial class UI
     {
         public static IEnumerator Scale(bool show, float duration, GameObject target, float scale, float easeSpeed = 0.5f)
         { 

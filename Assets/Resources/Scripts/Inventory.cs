@@ -4,9 +4,7 @@ using UnityEngine;
 
 public class Inventory
 {
-    Dictionary<string, int> _items = new Dictionary<string, int>();
-
-    public Inventory() { }
+    private readonly Dictionary<string, int> _items = new ();
 
     public void Add(string id)
     {

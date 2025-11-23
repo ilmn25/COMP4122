@@ -8,39 +8,28 @@ namespace Resources.Scripts
     public partial class Character
     {
         [NonSerialized] public readonly int MaxHealth = 3;
-        [NonSerialized] private readonly NetworkVariable<int> _currentHealth = new ();
-
+        [NonSerialized] private readonly NetworkVariable<int> _currentHealth = new(3);
         public int CurrentHealth
         {
             get => _currentHealth.Value;
-            set => _currentHealth.Value = value;
+            private set => _currentHealth.Value = value;
         }
-
-        public bool isDead;
 
         private void Start()
         {
-            CurrentHealth = MaxHealth;
-            isDead = false;
-        
-            HUD.InitializeHealth();
+            if (IsServer) CurrentHealth = MaxHealth;
             HUD.UpdateHealth();
         }
-
-        public void TakeDamage(int damageAmount = 1)
+        
+        [ServerRpc]
+        public void TakeDamageServerRpc(int damageAmount = 1)
         {
-            if (isDead || CurrentHealth <= 0)
-                return;
-        
-            CurrentHealth -= damageAmount;
-        
-            HUD.UpdateHealth();
-        
+            if (CurrentHealth <= 0) return;
+            CurrentHealth -= damageAmount; 
             if (CurrentHealth <= 0)
             {
-                isDead = true;
-        
-                HUD.UpdateHealth();
+                GetComponent<NetworkObject>().Despawn();
+                Destroy(gameObject);
                 Main.CurrentStatus = Status.MainMenu;
             }
         } 

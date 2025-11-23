@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 6867696176201172708}
   - component: {fileID: 2552986804148686310}
   m_Layer: 5
-  m_Name: Heart
+  m_Name: HeartHUD
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -65,7 +65,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: 2c174c4f0f87ed14f8ee1ab84ef52033, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 6bc4f18fe602e1741b6ff78e2ff2092c, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
