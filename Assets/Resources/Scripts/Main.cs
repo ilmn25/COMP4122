@@ -32,6 +32,8 @@ namespace Resources.Scripts
         {
             Instance = this;
             
+            // Audio.PlaySfx(AudioClipID.Noise, true);
+            // Audio.PlayBGM(AudioClipID.JestersPity);
             // Time.fixedDeltaTime = 0.30f;
             Application.targetFrameRate = 100; // set max fps 
             QualitySettings.vSyncCount = 0;
@@ -52,13 +54,7 @@ namespace Resources.Scripts
             // movement和viewport之类也是不用monoheavbiour的superclass绑在object上，如果class搬了下或者改名可能不小心script not found了超烦 （直接代替一些singleton）
              
         }
-
-        private void Start()
-        {
-            // Audio.PlaySfx(AudioClipID.Noise, true);
-            // Audio.PlayBGM(AudioClipID.JestersPity);
-        }
-
+ 
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.F)) Environment.SetEnvironment(EnvPreset.Day);
@@ -66,7 +62,6 @@ namespace Resources.Scripts
             if (Input.GetKeyDown(KeyCode.H))
             {
                 TargetPlayer.TakeDamageServerRpc();
-                HUD.UpdateHealth();
             }
                 
             if (Input.GetKeyDown(KeyCode.Escape)) 

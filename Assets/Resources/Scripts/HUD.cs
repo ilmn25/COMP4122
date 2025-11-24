@@ -6,27 +6,28 @@ namespace Resources.Scripts
 {
     public class HUD : MonoBehaviour
     { 
-        private static readonly List<Image> HealthImages = new ();
-        private static int CurrentHealth => Main.TargetPlayer.CurrentHealth; 
-        private static int MaxHealth => Main.TargetPlayer.MaxHealth; 
+        private static readonly List<Image> Health = new ();
+        private static readonly List<Image> Inventory = new ();
         
         public void Awake()
         {
-            for (int i = 0; i < 5; i++) CreateHealthIcon(); 
-            void CreateHealthIcon()
-            {
+            for (int i = 0; i < 5; i++) {
                 GameObject obj = Instantiate(UnityEngine.Resources.Load<GameObject>("Prefabs/HeartHUD"), transform);
-                HealthImages.Add(obj.GetComponent<Image>());
+                Health.Add(obj.GetComponent<Image>());
+            }
+            for (int i = 0; i < 5; i++) {
+                GameObject obj = Instantiate(UnityEngine.Resources.Load<GameObject>("Prefabs/HeartHUD"), transform);
+                Inventory.Add(obj.GetComponent<Image>());
             }
         }
-    
-        public static void UpdateHealth()
+
+        public static void UpdateHealth(int prev, int cur)
         {
-            for (int i = 0; i < HealthImages.Count; i++)
+            for (int i = 0; i < Health.Count; i++)
             {
-                if (i < CurrentHealth) HealthImages[i].sprite = Cache.LoadSprite("HeartFull");
-                else if (i < MaxHealth) HealthImages[i].sprite = Cache.LoadSprite("HeartEmpty");
-                else HealthImages[i].sprite = Cache.LoadSprite("Empty");
+                if (i < Main.TargetPlayer.CurrentHealth.Value) Health[i].sprite = Cache.LoadSprite("HeartFull");
+                else if (i < Main.TargetPlayer.MaxHealth.Value) Health[i].sprite = Cache.LoadSprite("HeartEmpty");
+                else Health[i].sprite = Cache.LoadSprite("Empty");
             }
         }
     }
