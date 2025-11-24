@@ -1,22 +1,20 @@
 using Unity.Netcode;
-using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Resources.Scripts
 {
     public class Interactable : NetworkBehaviour
     {
-        public string itemId;
+        public ItemID id;
 
         // Called when a character picks this object (server should handle actual despawn)
         public void OnPickedUp(Character character)
         {
-            character._inventory.Add(itemId);
+            character.Inventory.Add((int)id);
             Audio.PlaySfx(AudioClipID.Item);
+            
             // network-aware removal:
             NetworkObject net = GetComponent<NetworkObject>();
-            if (net.IsSpawned)
-                if (NetworkManager.Singleton.IsServer) net.Despawn();
+            if (net.IsSpawned && NetworkManager.Singleton.IsServer) net.Despawn();
             else Destroy(gameObject);
         }
     }

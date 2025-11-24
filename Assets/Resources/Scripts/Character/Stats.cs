@@ -7,13 +7,8 @@ namespace Resources.Scripts
     {
         [NonSerialized] public readonly NetworkVariable<int> MaxHealth = new(3);
         [NonSerialized] public readonly NetworkVariable<int> CurrentHealth = new(3); 
-
-        private void Start()
-        {
-            CurrentHealth.OnValueChanged += HUD.UpdateHealth;
-            MaxHealth.OnValueChanged += HUD.UpdateHealth;
-        }
-        
+        [NonSerialized] public readonly NetworkList<int> Inventory = new ();  
+ 
         [ServerRpc]
         public void TakeDamageServerRpc(int damageAmount = 1)
         {

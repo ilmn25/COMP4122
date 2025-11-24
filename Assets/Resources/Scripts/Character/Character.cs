@@ -32,16 +32,20 @@ namespace Resources.Scripts
         private const int Acceleration = 5;
         private const int Deceleration = 3; 
         private Vector3 _directionBuffer;
-        private Animator _animator;
-        public Inventory _inventory;
+        private Animator _animator; 
 
-        private void Awake()
-        { 
-            _inventory = new Inventory();
+        private void Start()
+        {
             _animator = GetComponent<Animator>();
             StartCoroutine(FootprintSpawnTimer());
+            
+            Inventory.OnListChanged += HUD.UpdateInventory; 
+            CurrentHealth.OnValueChanged += HUD.UpdateHealth;
+            MaxHealth.OnValueChanged += HUD.UpdateHealth; 
+            HUD.UpdateHealth(1, 1);
+            // HUD.UpdateInventory(new NetworkListEvent<int>());
+            
             return;
-        
             IEnumerator FootprintSpawnTimer()
             {
                 while (true)

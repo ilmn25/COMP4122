@@ -23,8 +23,6 @@ public class NetworkSpawner : NetworkBehaviour
 
     public int maxAttempts = 20;
  
-    
-
     // Listen for start game event from UI
     void OnEnable() => UI.OnBegin += SpawnAll;
     void OnDisable() => UI.OnBegin -= SpawnAll;
