@@ -162,7 +162,7 @@ namespace Resources.Scripts
         private void HandleInteraction()
         {
             int hitCount = Physics2D.OverlapBoxNonAlloc(transform.position + new Vector3(_colliderOffset.x, _colliderOffset.y, 0), 
-            _colliderSize, 0, ColliderArray, Main.MaskPickable);
+            _colliderSize, 0, ColliderArray, Main.MaskInteractable);
 
             Interactable nearest = null;
             float nearestSqr = float.MaxValue;
@@ -183,11 +183,8 @@ namespace Resources.Scripts
 
             }
 
-            for (int i = hitCount; i < ColliderArray.Length; i++) ColliderArray[i] = null;
-
             if (nearest && Input.GetKeyDown(KeyCode.E)) {
-                Debug.Log($"Tried to pick up!");
-                nearest.OnPickedUp(this);
+                nearest.Interact(this);
             }
         }
     }

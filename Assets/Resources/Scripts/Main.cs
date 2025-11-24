@@ -26,7 +26,7 @@ namespace Resources.Scripts
         public static LayerMask MaskSemi;
         public static LayerMask MaskCollide;
         
-        public static LayerMask MaskPickable;
+        public static LayerMask MaskInteractable;
  
         private void Awake()
         {
@@ -42,7 +42,7 @@ namespace Resources.Scripts
             MaskStatic  = LayerMask.GetMask( "Map", "Semi"); 
             MaskCollide  = LayerMask.GetMask( "Map"); 
             MaskSemi  = LayerMask.GetMask("Semi"); 
-            MaskPickable = LayerMask.GetMask("Pickable");
+            MaskInteractable = LayerMask.GetMask("Interactable");
             ViewportObject = GameObject.Find("Viewport");
             MainCameraObject = GameObject.Find("MainCamera"); 
             
