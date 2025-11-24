@@ -5,7 +5,7 @@ namespace Resources.Scripts
 {
     public enum AudioClipID
     {
-        Noise, JestersPity, Footsteps1, Footsteps2, Item
+        Noise, JestersPity, Footsteps1, Footsteps2, Item, Blood
     }
     public class Audio
     {

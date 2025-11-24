@@ -13,9 +13,10 @@ namespace Resources.Scripts
         public void TakeDamageServerRpc(int damageAmount = 1)
         {
             if (CurrentHealth.Value <= 0) return;
+            Audio.PlaySfx(AudioClipID.Blood);
             CurrentHealth.Value -= damageAmount; 
             if (CurrentHealth.Value <= 0)
-            {
+            { 
                 GetComponent<NetworkObject>().Despawn();
                 Destroy(gameObject);
                 Main.CurrentStatus = Status.MainMenu;  
