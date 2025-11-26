@@ -15,7 +15,8 @@ namespace Resources.Scripts
             {
                 while (true)
                 {
-                    yield return new WaitForSeconds(2f);
+                    yield return new WaitForSeconds(1f);
+                    yield return new WaitForSeconds(Random.Range(0f, 2f));
                     _animator.Play(_animator.GetCurrentAnimatorStateInfo(0).shortNameHash, -1, 0f);
                     Scan(); 
                 } 

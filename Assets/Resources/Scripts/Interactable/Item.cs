@@ -1,5 +1,4 @@
 ﻿using Unity.Netcode;
-using UnityEngine;
 
 namespace Resources.Scripts
 {
@@ -32,17 +31,6 @@ namespace Resources.Scripts
             NetworkObject net = GetComponent<NetworkObject>();
             if (net.IsSpawned && NetworkManager.Singleton.IsServer) net.Despawn();
             else Destroy(gameObject);
-        }
-    }
-    
-    public class Portal : Interactable
-    {
-        public Vector3 position;
-
-        public override void Interact(Character character)
-        {
-            character.transform.position = position;
-            Audio.PlaySfx(AudioClipID.Item);
         }
     }
 }
