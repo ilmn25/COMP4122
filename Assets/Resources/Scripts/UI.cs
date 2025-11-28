@@ -14,7 +14,7 @@ namespace Resources.Scripts
 {
     public partial class UI : MonoBehaviour
     { 
-        private const int MinPlayers = 1;
+        private const int MinPlayers = 2;
         
         public GameObject uiMainMenuObject;
         public Button uiHostButton;
