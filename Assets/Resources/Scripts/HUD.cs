@@ -7,12 +7,14 @@ namespace Resources.Scripts
 {
     public enum ItemID { Card }
     public class HUD : MonoBehaviour
-    { 
+    {
+        public static HUD Inst;
         private static readonly List<Image> Health = new ();
         private static readonly List<Image> Inventory = new ();
         
         public void Awake()
-        { 
+        {
+            Inst = this;
             Transform parent = transform.Find("Health"); 
             for (int i = 0; i < 5; i++) {
                 GameObject obj = Instantiate(UnityEngine.Resources.Load<GameObject>("Prefabs/Icon"), parent);
