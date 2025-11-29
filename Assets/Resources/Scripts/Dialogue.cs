@@ -17,7 +17,6 @@ namespace Resources.Scripts
     public class Dialogue : MonoBehaviour
     {
         public static Dialogue Inst;
-        public GameObject box;
         public TextMeshProUGUI text;
         public Image image;
         public GameObject imageObject;
@@ -28,6 +27,7 @@ namespace Resources.Scripts
 
         private static CoroutineTask _scrollTask;
         private static DialogueData _target;
+        private static Action _onFinished;
         private static bool _showing = true;
         private static CoroutineTask _scaleTask;
 
@@ -37,9 +37,10 @@ namespace Resources.Scripts
             Inst.Show(false); 
         }
 
-        public static void Run(DialogueData target)
+        public static void Run(DialogueData target, Action onFinished = null)
         {
             _target = target;
+            _onFinished = onFinished;
             Inst.Show(true); 
         }
         
@@ -70,6 +71,7 @@ namespace Resources.Scripts
                     {
                         if (_scrollTask != null && _scrollTask.Running) _scrollTask.Stop();
                         gameObject.SetActive(false); 
+                        _onFinished?.Invoke();
                     }; 
                 }
             }

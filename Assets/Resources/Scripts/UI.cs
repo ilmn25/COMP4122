@@ -7,6 +7,8 @@ using Unity.Services.Relay;
 using Unity.Services.Relay.Models;
 using Unity.Netcode.Transports.UTP;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using TMPro;
 using UnityEngine.UI;
 
@@ -55,15 +57,14 @@ namespace Resources.Scripts
     { 
         private static bool _busy; 
         public static event Action OnBegin; // event for starting the game 
-        
+ 
         private void OnClientConnected(ulong clientId)
         {
             if (clientId == NetworkManager.Singleton.LocalClientId)
             {
-                Main.TargetPlayer = NetworkManager.Singleton.LocalClient?.PlayerObject.GetComponent<Character>();
+                Main.TargetPlayer = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Character>(); 
+                Main.TargetPlayer.transform.position = new Vector3(4, 66, 0);
                 Main.CurrentStatus = Status.Game;
-                uiMainMenuObject.SetActive(false);
-                uiHostObject.SetActive(false);
                 uiJoinObject.SetActive(false);
                 Environment.SetEnvironment(EnvPreset.Night);
             }
@@ -74,11 +75,9 @@ namespace Resources.Scripts
         {
             if (clientId == NetworkManager.Singleton.LocalClientId)
             {
-                uiHostObject.SetActive(false);
-                uiJoinObject.SetActive(false);
                 uiMainMenuObject.SetActive(true);
                 Main.TargetPlayer = null;
-                Main.CurrentStatus = Status.MainMenu; 
+                Main.CurrentStatus = Status.Freeze; 
                 Main.ViewportObject.transform.position = new Vector3(0, 0, -1000);
             }
             UpdateBeginButtonState();
@@ -88,11 +87,14 @@ namespace Resources.Scripts
         {
             if (_busy) return;
             _busy = true;
-            CoroutineTask task = new CoroutineTask(Slide(false, 0f, uiMainMenuObject, new Vector3(0, -10, 0)));
-            task.Finished += _ =>
+            StartCoroutine(Slide(false, 0f, uiMainMenuObject, new Vector3(0, -10, 0))); 
+            _ = new CoroutineTask(Task());
+            IEnumerator Task()
             {
+                Environment.SetEnvironment(EnvPreset.BlackScreen);
+                yield return new WaitForSeconds(3);
                 OnFinished();
-            };
+            }
             return;
             
             async void OnFinished()
@@ -116,10 +118,7 @@ namespace Resources.Scripts
                 }
                 catch (RelayServiceException e)
                 {
-                    Debug.LogError($"Relay service error: {e}");
-                    // Reset to main menu on error
-                    Main.TargetPlayer = null;
-                    Main.CurrentStatus = Status.MainMenu;
+                    Debug.LogError($"Relay service error: {e}"); 
                     uiMainMenuObject.SetActive(true);
                 }
                 finally
@@ -130,9 +129,52 @@ namespace Resources.Scripts
         }
 
         private void OnBeginButtonClicked()
-        {
+        { 
+            uiBeginButton.interactable = false;
             OnBegin?.Invoke();
-            uiHostObject.SetActive(false);
+            BeginClientRpc();  
+        }
+        
+        [ClientRpc]
+        private void BeginClientRpc(ClientRpcParams rpcParams = default)
+        {
+            StartCoroutine(Task());
+            return;
+
+            IEnumerator Task()
+            {
+                Environment.SetEnvironment(EnvPreset.BlackScreen);
+                yield return new WaitForSeconds(3);
+
+                uiHostObject.SetActive(false);
+                Main.CurrentStatus = Status.Freeze;
+                yield return new WaitForSeconds(1);
+                Dialogue.Run(new DialogueData
+                {
+                    Text = "29th December, 2027",
+                    Next = new Dictionary<string, DialogueData>
+                    {
+                        { "", new DialogueData {
+                            Text = "haily forgot to pay taxes and is going to get arrested for 10 years", 
+                            Next = new Dictionary<string, DialogueData>
+                            {
+                                { "", new DialogueData { Text = "so she's hiding in chognxin daxia" }}
+                            }
+                            } 
+                        }
+                    }
+                }, () => StartCoroutine(OnDialogueEnd()));
+            }
+
+            IEnumerator OnDialogueEnd()
+            {
+                yield return new WaitForSeconds(3);
+                Environment.SetEnvironment(EnvPreset.Night);
+                Main.TargetPlayer.transform.position = Vector3.zero;
+                Main.CurrentStatus = Status.Game;
+                HUD.UpdateHealth(1, 1);
+                yield return new WaitForSeconds(3);
+            }
         }
  
         private void UpdateBeginButtonState()
@@ -188,7 +230,7 @@ namespace Resources.Scripts
             }
         }
         
-        private System.Collections.IEnumerator ConnectionTimeoutHandler()
+        private IEnumerator ConnectionTimeoutHandler()
         {
             float elapsed = 0f;
             
@@ -207,7 +249,7 @@ namespace Resources.Scripts
                 
                 // Reset UI state
                 Main.TargetPlayer = null;
-                Main.CurrentStatus = Status.MainMenu;
+                Main.CurrentStatus = Status.Freeze;
                 uiMainMenuObject.SetActive(true);
             }
         }

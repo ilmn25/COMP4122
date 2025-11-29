@@ -32,8 +32,8 @@ namespace Resources.Scripts
             
             Volume[AudioClipID.Noise] = 10;
             Volume[AudioClipID.Item] = 0.3f;
-            Volume[AudioClipID.Footsteps1] = 0.3f;
-            Volume[AudioClipID.Footsteps2] = 0.3f;
+            Volume[AudioClipID.Footsteps1] = 0.15f;
+            Volume[AudioClipID.Footsteps2] = 0.15f;
             Volume[AudioClipID.Text] = 0.7f;
         }
 

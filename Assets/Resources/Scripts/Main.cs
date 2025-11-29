@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
@@ -9,13 +10,13 @@ namespace Resources.Scripts
 {
     public enum Status
     {
-        MainMenu, Game, HostUI, JoinUI, Pause
+        Freeze, Game, HostUI, JoinUI, Pause
     }
     
     public class Main : MonoBehaviour
     {
         public static Main Instance;
-        public static Status CurrentStatus = Status.MainMenu;
+        public static Status CurrentStatus = Status.Freeze;
         public static Character TargetPlayer;
         public static GameObject ViewportObject;
         public static GameObject MainCameraObject;
@@ -53,9 +54,8 @@ namespace Resources.Scripts
             // 直接吧所有object之类放这里，像一个字典那样，因为如果直接public，然后drag and drop然后后边要搬或copypaste然后reference断了就超烦
             // 所以要找object时当Main做字典用吧 （Main.TargetPlayer.transform.position) 那样
             // movement和viewport之类也是不用monoheavbiour的superclass绑在object上，如果class搬了下或者改名可能不小心script not found了超烦 （直接代替一些singleton）
-             
-        }
- 
+              
+        } 
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.F)) Environment.SetEnvironment(EnvPreset.Day);
@@ -79,14 +79,8 @@ namespace Resources.Scripts
             Viewport.Update();
             switch (CurrentStatus)
             {
-                case Status.MainMenu:  
-                    break;
-                case Status.HostUI:  
-                    break;
-                case Status.JoinUI:  
-                    break;
-                case Status.Pause:  
-                    break;
+                case Status.Freeze:  
+                    break; 
                 case Status.Game:  
                     Movement.Update();
                     // 这里可以一会而用来pause一些东西，好像在interact时候不要控制走来走去

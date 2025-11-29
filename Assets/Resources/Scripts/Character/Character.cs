@@ -35,23 +35,21 @@ namespace Resources.Scripts
         private Animator _animator; 
 
         private void Start()
-        {
-            _animator = GetComponent<Animator>();
-            StartCoroutine(FootprintSpawnTimer());
-            
+        { 
+            _animator = GetComponent<Animator>(); 
+             
             Inventory.OnListChanged += HUD.UpdateInventory; 
             CurrentHealth.OnValueChanged += HUD.UpdateHealth;
-            MaxHealth.OnValueChanged += HUD.UpdateHealth; 
-            HUD.UpdateHealth(1, 1);
-            // HUD.UpdateInventory(new NetworkListEvent<int>());
+            MaxHealth.OnValueChanged += HUD.UpdateHealth;
             
+            StartCoroutine(FootprintSpawnTimer());
             return;
             IEnumerator FootprintSpawnTimer()
             {
                 while (true)
                 {
                     yield return new WaitForSeconds(0.3f);
-                    if (CurrentSpeed > 0.1f)
+                    if (CurrentSpeed > 0.1f && Main.CurrentStatus == Status.Game)
                     {
                         ObjectPool.GetObject(ID.Footprint).transform.position = transform.position;
                         Audio.PlaySfx(UnityEngine.Random.Range(0,2) == 0? AudioClipID.Footsteps1 : AudioClipID.Footsteps2);
