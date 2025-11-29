@@ -49,7 +49,7 @@ namespace Resources.Scripts
                 while (true)
                 {
                     yield return new WaitForSeconds(0.3f);
-                    if (CurrentSpeed > 0.1f && Main.CurrentStatus == Status.Game)
+                    if (CurrentSpeed > 0.1f && Main.CanMove)
                     {
                         ObjectPool.GetObject(ID.Footprint).transform.position = transform.position;
                         Audio.PlaySfx(UnityEngine.Random.Range(0,2) == 0? AudioClipID.Footsteps1 : AudioClipID.Footsteps2);

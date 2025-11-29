@@ -19,7 +19,7 @@ namespace Resources.Scripts
             { 
                 GetComponent<NetworkObject>().Despawn();
                 Destroy(gameObject);
-                Main.CurrentStatus = Status.Freeze;  
+                //cant move
             }
         } 
     }

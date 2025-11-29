@@ -4,23 +4,20 @@ using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 using TMPro;
+using Unity.Netcode;
 
 
 namespace Resources.Scripts
-{
-    public enum Status
-    {
-        Freeze, Game, HostUI, JoinUI, Pause
-    }
+{ 
     
     public class Main : MonoBehaviour
     {
-        public static Main Instance;
-        public static Status CurrentStatus = Status.Freeze;
+        public static Main Instance; 
         public static Character TargetPlayer;
         public static GameObject ViewportObject;
         public static GameObject MainCameraObject;
 
+        public static bool CanMove = true;
         public static Light2D AmbientLight;
         public static Light2D SpotLight;
         
@@ -57,35 +54,30 @@ namespace Resources.Scripts
               
         } 
         private void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.F)) Environment.SetEnvironment(EnvPreset.Day);
-            if (Input.GetKeyDown(KeyCode.G)) Environment.SetEnvironment(EnvPreset.Night);
-            if (Input.GetKeyDown(KeyCode.H))
-            {
-                Dialogue.Run(new DialogueData
-                {
-                    Text = "okane kasegu watashi wa star",
-                    Next = new Dictionary<string, DialogueData>
-                    {
-                        { "", new DialogueData { Text = "12102421401724012751249712094791234710294710294127410247102947" } }
-                    }
-                });
-            }
-                
-            if (Input.GetKeyDown(KeyCode.Escape)) 
-                Screen.fullScreen = !Screen.fullScreen;
+        {  
               
-            // 这里看到update是由这个update叫其他其他update那样cascade下去，那样如果一个update要在另外一个update后面跑的话就不用lateupdate()那样折磨了 （avoids race condition)
-            Viewport.Update();
-            switch (CurrentStatus)
+            if (Input.GetKeyDown(KeyCode.Escape)) Screen.fullScreen = !Screen.fullScreen;
+            Viewport.Update(); 
+            if (CanMove) Move();
+            return;
+            
+            void Move()
             {
-                case Status.Freeze:  
-                    break; 
-                case Status.Game:  
-                    Movement.Update();
-                    // 这里可以一会而用来pause一些东西，好像在interact时候不要控制走来走去
-                    break;
-            } 
-        }
+                if (TargetPlayer)
+                {
+                    Vector2 direction = Vector2.zero;
+                    if (Input.GetKey(KeyCode.W))
+                        direction += Vector2.up;
+                    if (Input.GetKey(KeyCode.S)) 
+                        direction += Vector2.down;
+                    if (Input.GetKey(KeyCode.A))
+                        direction += Vector2.left;
+                    if (Input.GetKey(KeyCode.D))
+                        direction += Vector2.right;
+            
+                    TargetPlayer.Direction = direction;
+                } 
+            }
+        } 
     }
 }

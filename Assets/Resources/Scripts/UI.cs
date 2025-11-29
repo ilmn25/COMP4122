@@ -15,7 +15,8 @@ using UnityEngine.UI;
 namespace Resources.Scripts
 {
     public partial class UI : MonoBehaviour
-    { 
+    {
+        public static UI Inst;
         private const int MinPlayers = 1;
         
         public GameObject uiMainMenuObject;
@@ -34,6 +35,7 @@ namespace Resources.Scripts
         
         public void Start()
         {
+            Inst = this;
             uiHostButton.onClick.AddListener(OnHostButtonClicked);
             uiJoinButton.onClick.AddListener(OnJoinButtonClicked);
             uiQuitButton.onClick.AddListener(OnQuitButtonClicked);
@@ -64,7 +66,7 @@ namespace Resources.Scripts
             {
                 Main.TargetPlayer = NetworkManager.Singleton.LocalClient.PlayerObject.GetComponent<Character>(); 
                 Main.TargetPlayer.transform.position = new Vector3(4, 66, 0);
-                Main.CurrentStatus = Status.Game;
+                Main.CanMove = true;
                 uiJoinObject.SetActive(false);
                 Environment.SetEnvironment(EnvPreset.Night);
             }
@@ -77,7 +79,7 @@ namespace Resources.Scripts
             {
                 uiMainMenuObject.SetActive(true);
                 Main.TargetPlayer = null;
-                Main.CurrentStatus = Status.Freeze; 
+                Main.CanMove = false; 
                 Main.ViewportObject.transform.position = new Vector3(0, 0, -1000);
             }
             UpdateBeginButtonState();
@@ -132,51 +134,10 @@ namespace Resources.Scripts
         { 
             uiBeginButton.interactable = false;
             OnBegin?.Invoke();
-            BeginClientRpc();  
+            uiHostObject.SetActive(false);
+            Cutscene.Scene.Value = 1; 
         }
-        
-        [ClientRpc]
-        private void BeginClientRpc(ClientRpcParams rpcParams = default)
-        {
-            StartCoroutine(Task());
-            return;
-
-            IEnumerator Task()
-            {
-                Environment.SetEnvironment(EnvPreset.BlackScreen);
-                yield return new WaitForSeconds(3);
-
-                uiHostObject.SetActive(false);
-                Main.CurrentStatus = Status.Freeze;
-                yield return new WaitForSeconds(1);
-                Dialogue.Run(new DialogueData
-                {
-                    Text = "29th December, 2027",
-                    Next = new Dictionary<string, DialogueData>
-                    {
-                        { "", new DialogueData {
-                            Text = "haily forgot to pay taxes and is going to get arrested for 10 years", 
-                            Next = new Dictionary<string, DialogueData>
-                            {
-                                { "", new DialogueData { Text = "so she's hiding in chognxin daxia" }}
-                            }
-                            } 
-                        }
-                    }
-                }, () => StartCoroutine(OnDialogueEnd()));
-            }
-
-            IEnumerator OnDialogueEnd()
-            {
-                yield return new WaitForSeconds(3);
-                Environment.SetEnvironment(EnvPreset.Night);
-                Main.TargetPlayer.transform.position = Vector3.zero;
-                Main.CurrentStatus = Status.Game;
-                HUD.UpdateHealth(1, 1);
-                yield return new WaitForSeconds(3);
-            }
-        }
- 
+         
         private void UpdateBeginButtonState()
         {
             if (!NetworkManager.Singleton.IsHost) return;
@@ -249,7 +210,7 @@ namespace Resources.Scripts
                 
                 // Reset UI state
                 Main.TargetPlayer = null;
-                Main.CurrentStatus = Status.Freeze;
+                Main.CanMove = false;
                 uiMainMenuObject.SetActive(true);
             }
         }
