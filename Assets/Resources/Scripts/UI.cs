@@ -69,6 +69,7 @@ namespace Resources.Scripts
                 Main.CanMove = true;
                 uiJoinObject.SetActive(false);
                 Environment.SetEnvironment(EnvPreset.Night);
+                StartCoroutine(Slide(true, 0.2f, uiMainMenuObject, Vector3.zero)); 
             }
             UpdateBeginButtonState();
         }
@@ -78,9 +79,11 @@ namespace Resources.Scripts
             if (clientId == NetworkManager.Singleton.LocalClientId)
             {
                 uiMainMenuObject.SetActive(true);
+                uiHostObject.SetActive(false);
                 Main.TargetPlayer = null;
                 Main.CanMove = false; 
-                Main.ViewportObject.transform.position = new Vector3(0, 0, -1000);
+                HUD.Inst.gameObject.SetActive(false);
+                Environment.SetEnvironment(EnvPreset.Night);  
             }
             UpdateBeginButtonState();
         }
@@ -89,7 +92,7 @@ namespace Resources.Scripts
         {
             if (_busy) return;
             _busy = true;
-            StartCoroutine(Slide(false, 0f, uiMainMenuObject, new Vector3(0, -10, 0))); 
+            StartCoroutine(Slide(false, 0.1f, uiMainMenuObject, new Vector3(0, -10, 0))); 
             _ = new CoroutineTask(Task());
             IEnumerator Task()
             {
@@ -135,7 +138,7 @@ namespace Resources.Scripts
             uiBeginButton.interactable = false;
             OnBegin?.Invoke();
             uiHostObject.SetActive(false);
-            Cutscene.Scene.Value = 1; 
+            Cutscene.Scene.Value = 2; 
         }
          
         private void UpdateBeginButtonState()
@@ -219,5 +222,6 @@ namespace Resources.Scripts
         {
             Application.Quit();  
         }
+         
     }
 }
