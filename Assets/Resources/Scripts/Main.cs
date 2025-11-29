@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
@@ -61,12 +62,19 @@ namespace Resources.Scripts
             if (Input.GetKeyDown(KeyCode.G)) Environment.SetEnvironment(EnvPreset.Night);
             if (Input.GetKeyDown(KeyCode.H))
             {
-                TargetPlayer.TakeDamageServerRpc();
+                Dialogue.Run(new DialogueData
+                {
+                    Text = "okane kasegu watashi wa star",
+                    Next = new Dictionary<string, DialogueData>
+                    {
+                        { "", new DialogueData { Text = "12102421401724012751249712094791234710294710294127410247102947" } }
+                    }
+                });
             }
                 
             if (Input.GetKeyDown(KeyCode.Escape)) 
                 Screen.fullScreen = !Screen.fullScreen;
-            
+              
             // 这里看到update是由这个update叫其他其他update那样cascade下去，那样如果一个update要在另外一个update后面跑的话就不用lateupdate()那样折磨了 （avoids race condition)
             Viewport.Update();
             switch (CurrentStatus)

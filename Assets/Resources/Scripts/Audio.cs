@@ -5,7 +5,7 @@ namespace Resources.Scripts
 {
     public enum AudioClipID
     {
-        Noise, JestersPity, Footsteps1, Footsteps2, Item, Blood
+        Noise, JestersPity, Footsteps1, Footsteps2, Item, Blood, Text
     }
     public class Audio
     {
@@ -34,6 +34,7 @@ namespace Resources.Scripts
             Volume[AudioClipID.Item] = 0.3f;
             Volume[AudioClipID.Footsteps1] = 0.3f;
             Volume[AudioClipID.Footsteps2] = 0.3f;
+            Volume[AudioClipID.Text] = 0.7f;
         }
 
         public static void PlayBGM(AudioClipID id, float volume = 1f, bool loop = true)
