@@ -58,7 +58,10 @@ namespace Resources.Scripts
               
             if (Input.GetKeyDown(KeyCode.Escape)) Screen.fullScreen = !Screen.fullScreen;
             Viewport.Update(); 
+            
             if (CanMove) Move();
+            else 
+                TargetPlayer.Direction = Vector2.zero;
             return;
             
             void Move()
