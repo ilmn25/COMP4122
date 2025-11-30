@@ -7,7 +7,7 @@ namespace Resources.Scripts
     {
         [NonSerialized] public readonly NetworkVariable<int> MaxHealth = new(3);
         [NonSerialized] public readonly NetworkVariable<int> CurrentHealth = new(3); 
-        [NonSerialized] public readonly NetworkList<int> Inventory = new ();  
+        [NonSerialized] public readonly NetworkList<int> Inventory = new();  
  
         [ServerRpc]
         public void TakeDamageServerRpc(int damageAmount = 1)
