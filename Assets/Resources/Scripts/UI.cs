@@ -32,6 +32,9 @@ namespace Resources.Scripts
         public GameObject uiJoinObject;
         public TMP_InputField uiInputField;
         public Button uiEnterButton;
+
+        public GameObject uiPhoneObject;
+        public TextMeshProUGUI uiPhoneInput;
         
         public void Start()
         {
@@ -45,6 +48,7 @@ namespace Resources.Scripts
             // Hide both UI panels initially
             uiHostObject.SetActive(false);
             uiJoinObject.SetActive(false);
+            uiPhoneObject.SetActive(false);
             
             // Initialize Unity Services
             UnityServices.InitializeAsync();
@@ -138,7 +142,7 @@ namespace Resources.Scripts
             uiBeginButton.interactable = false;
             OnBegin?.Invoke();
             uiHostObject.SetActive(false);
-            Cutscene.Scene.Value = 2; 
+            Cutscene.Scene.Value = 1;
         }
          
         private void UpdateBeginButtonState()
