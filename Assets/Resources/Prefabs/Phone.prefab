@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4219704921013757501}
   - component: {fileID: 9010926289240392079}
   - component: {fileID: 1626900491862866497}
-  - component: {fileID: 4220025405216952091}
+  - component: {fileID: 4571743319392860365}
   m_Layer: 8
   m_Name: Phone
   m_TagString: Untagged
@@ -29,7 +29,7 @@ Transform:
   m_GameObject: {fileID: 4756332300124660972}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 24.53, y: -15.48, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -76,8 +76,8 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: b3802800286c52646b447c15083553b2, type: 3}
+  m_SortingOrder: 3
+  m_Sprite: {fileID: 21300000, guid: e184ed2461432a345bf61042b07bd7d2, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -100,8 +100,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 880722870
-  InScenePlacedSourceGlobalObjectIdHash: 1817261986
+  GlobalObjectIdHash: 3883038434
+  InScenePlacedSourceGlobalObjectIdHash: 880722870
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
   ActiveSceneSynchronization: 0
@@ -141,20 +141,20 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: -0.0042874813, y: -1.4256418}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.5, y: 1.3125}
+    oldSize: {x: 1, y: 1}
     newSize: {x: 16, y: 16}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.75, y: 0.6875}
+  m_Size: {x: 1.0043845, y: 3.7788768}
   m_EdgeRadius: 0
---- !u!114 &4220025405216952091
+--- !u!114 &4571743319392860365
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -163,9 +163,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 4756332300124660972}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 202ab99f911841bbac7516b5d9d71d4c, type: 3}
+  m_Script: {fileID: 11500000, guid: 695d3602fce94bec9bfb12d7a24d1a60, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  phoneUI: {fileID: 0}
 --- !u!1 &6684947343742794523
 GameObject:
   m_ObjectHideFlags: 0
