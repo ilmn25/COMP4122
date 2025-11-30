@@ -104,36 +104,21 @@ namespace Resources.Scripts
             _isOpen = false;
             UpdateDoorVisuals();
             
-            if (_colliderObject != null)
-            {
-                _colliderObject.SetActive(true);
-            }
+            if (_colliderObject) _colliderObject.SetActive(true);
         }
         
         private void UpdateDoorVisuals()
         {
-            if (_isOpen)
-            {
-                _spriteRenderer.sprite = Cache.LoadSprite(isFaceFront ? "Door2" : "Door1");
-            }
-            else
-            {
-                _spriteRenderer.sprite = Cache.LoadSprite(isFaceFront ? "Door1" : "Door2");
-            }
+            if (_isOpen) _spriteRenderer.sprite = Cache.LoadSprite(isFaceFront ? "Door2" : "Door1");
+            else _spriteRenderer.sprite = Cache.LoadSprite(isFaceFront ? "Door1" : "Door2");
         }
         
         public void SetDoorState(bool open)
         {
-            if (open)
-            {
-                OpenDoor();
-            }
-            else
-            {
-                CloseDoor();
-            }
+            if (open) OpenDoor();
+            else CloseDoor();
         }
-        
+
         public bool IsOpen()
         {
             return _isOpen;

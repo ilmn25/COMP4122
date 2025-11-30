@@ -60,8 +60,7 @@ namespace Resources.Scripts
             Viewport.Update(); 
             
             if (CanMove) Move();
-            else 
-                TargetPlayer.Direction = Vector2.zero;
+            else TargetPlayer.Direction = Vector2.zero;
             return;
             
             void Move()
@@ -76,7 +75,7 @@ namespace Resources.Scripts
                     if (Input.GetKey(KeyCode.A))
                         direction += Vector2.left;
                     if (Input.GetKey(KeyCode.D))
-                        direction += Vector2.right;
+                        direction += Vector2.right; 
             
                     TargetPlayer.Direction = direction;
                 } 

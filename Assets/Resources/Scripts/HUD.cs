@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace Resources.Scripts
 {
-    public enum ItemID { Card }
+    public enum ItemID { Card, Clue }
     public enum StatusID { Slow, Stuck, }
     public class HUD : MonoBehaviour
     {

@@ -55,7 +55,7 @@ namespace Resources.Scripts
                     yield return null;
                 }
                 Environment.SetEnvironment(EnvPreset.Night);
-                Main.TargetPlayer.transform.position = Vector3.zero;
+                Main.TargetPlayer.transform.position = new Vector3(-51.5f, 2f, 0f);;
                 Main.CanMove = true;
                 HUD.UpdateHealth(1, 1);
                 HUD.Inst.gameObject.SetActive(true);
