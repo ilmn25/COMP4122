@@ -37,9 +37,11 @@ namespace Resources.Scripts
                 {
                     { "", new DialogueData {
                             Text = "haily forgot to pay taxes and is going to get arrested for 10 years", 
+                            Sprite = Cache.LoadSprite("PlayerDialogue"),
                             Next = new Dictionary<string, DialogueData>
                             {
-                                { "", new DialogueData { Text = "so she's hiding in chognxin daxia" }}
+                                { "", new DialogueData { Text = "so she's hiding in chognxin daxia", 
+                                    Sprite = Cache.LoadSprite("PlayerDialogue")}}
                             }
                         } 
                     }

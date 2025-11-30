@@ -35,6 +35,7 @@ namespace Resources.Scripts
         {
             Inst = this;
             Inst.Show(false); 
+            image.sprite = Cache.LoadSprite("Empty"); 
         }
 
         public static void Run(DialogueData target, Action onFinished = null)
@@ -113,15 +114,16 @@ namespace Resources.Scripts
             if (sprite)
             {  
                 image.sprite = _target.Sprite; 
-                if (image.transform.position != new Vector3(220, -95, 203))
-                    _ = new CoroutineTask(Tween.Slide(true, 0.2f, imageObject, 
-                        new Vector3(220, -95, 160), EaseSpeed)); 
+                _ = new CoroutineTask(Tween.Slide(true, 0.2f, imageObject, 
+                    new Vector3(-6, -2, 0), EaseSpeed)); 
             }
             else
             {
-                if (image.transform.position != new Vector3(500, -95, 203))
-                    _ = new CoroutineTask(Tween.Slide(false, 0.1f, imageObject, 
-                        new Vector3(500, -95, 160), EaseSpeed));
+                new CoroutineTask(Tween.Slide(false, 0.1f, imageObject, 
+                    new Vector3(-18, -2, 0), EaseSpeed)).Finished += manual =>
+                {
+                    image.sprite = Cache.LoadSprite("Empty"); 
+                };
             }
         }
     }
