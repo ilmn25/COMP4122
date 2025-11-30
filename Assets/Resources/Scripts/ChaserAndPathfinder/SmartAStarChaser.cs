@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using TMPro;
 using Unity.Netcode;
+using Resources.Scripts; 
 
 public class SmartAStarChaser : NetworkBehaviour
 {
@@ -26,12 +27,6 @@ public class SmartAStarChaser : NetworkBehaviour
     public float idleTime = 2f;
     public float patrolRecalculateInterval = 2f;
     
-    [Header("Game Over UI")]
-    public GameObject gameOverPanel;
-    public TextMeshProUGUI gameOverText;
-    public UnityEngine.UI.Button restartButton;
-    public UnityEngine.UI.Button mainMenuButton;
-    
     private List<Transform> players = new List<Transform>();
     private Transform currentTarget;
     private List<Vector3> currentPath;
@@ -53,6 +48,13 @@ public class SmartAStarChaser : NetworkBehaviour
     private float idleTimer = 0f;
     private bool isIdle = false;
 
+    // UI references
+    private GameObject loseUI;
+    private GameObject mainMenuUI;
+    private TextMeshProUGUI deadText;
+    private UnityEngine.UI.Button menuButton;
+    private UnityEngine.UI.Button quitButton;
+
     public override void OnNetworkSpawn()
     {
         if (!IsServer) 
@@ -70,8 +72,73 @@ public class SmartAStarChaser : NetworkBehaviour
         // Set initial patrol target
         SetRandomPatrolTarget();
         
+        // Initialize UI references
+        InitializeUI();
+        
         // Ensure players are initialized
         Invoke(nameof(InitializeChaser), 1f);
+    }
+    
+    void InitializeUI()
+    {
+        // 查找UI GameObject
+        GameObject uiObject = GameObject.Find("UI");
+        if (uiObject != null)
+        {
+            Debug.Log("Found UI object");
+            
+            // 查找Lose UI
+            loseUI = uiObject.transform.Find("Lose")?.gameObject;
+            if (loseUI != null)
+            {
+                Debug.Log("Found Lose UI");
+                
+                // 初始化Lose UI组件
+                Transform textTMP = loseUI.transform.Find("Text (TMP)");
+                if (textTMP != null)
+                {
+                    deadText = textTMP.GetComponent<TextMeshProUGUI>();
+                }
+                
+                Transform menuBtn = loseUI.transform.Find("MenuButton");
+                if (menuBtn != null)
+                {
+                    menuButton = menuBtn.GetComponent<UnityEngine.UI.Button>();
+                    menuButton.onClick.RemoveAllListeners();
+                    menuButton.onClick.AddListener(ReturnToMainMenu);
+                }
+                
+                Transform quitBtn = loseUI.transform.Find("QuitButton");
+                if (quitBtn != null)
+                {
+                    quitButton = quitBtn.GetComponent<UnityEngine.UI.Button>();
+                    quitButton.onClick.RemoveAllListeners();
+                    quitButton.onClick.AddListener(QuitGame);
+                }
+                
+                loseUI.SetActive(false);
+            }
+            else
+            {
+                Debug.LogWarning("Lose UI not found");
+            }
+            
+            // 查找MainMenu UI
+            mainMenuUI = uiObject.transform.Find("MainMenu")?.gameObject;
+            if (mainMenuUI != null)
+            {
+                Debug.Log("Found MainMenu UI");
+                mainMenuUI.SetActive(false);
+            }
+            else
+            {
+                Debug.LogWarning("MainMenu UI not found");
+            }
+        }
+        else
+        {
+            Debug.LogError("UI object not found in scene!");
+        }
     }
     
     void InitializeChaser()
@@ -83,6 +150,12 @@ public class SmartAStarChaser : NetworkBehaviour
     
     void Update()
     {
+        // 如果MainMenu UI显示中，停止所有AI逻辑
+        if (mainMenuUI != null && mainMenuUI.activeInHierarchy)
+        {
+            return;
+        }
+        
         if (!IsServer || gameOver) return;
         
         // State machine
@@ -553,64 +626,170 @@ public class SmartAStarChaser : NetworkBehaviour
         if (distanceToPlayer <= catchDistance)
         {
             Debug.Log($"Caught player! Distance: {distanceToPlayer}");
-            CatchPlayerServerRpc();
+            
+            // 获取被抓住玩家的NetworkObject
+            NetworkObject caughtPlayer = currentTarget.GetComponent<NetworkObject>();
+            if (caughtPlayer != null)
+            {
+                // 只向被抓住的玩家发送GameOver
+                CatchPlayerClientRpc(caughtPlayer.OwnerClientId);
+            }
+            else
+            {
+                Debug.LogError("Cannot find NetworkObject on caught player");
+            }
         }
     }
     
-    [ServerRpc]
-    void CatchPlayerServerRpc()
-    {
-        GameOverClientRpc();
-    }
-    
     [ClientRpc]
-    void GameOverClientRpc()
+    void CatchPlayerClientRpc(ulong caughtPlayerId)
     {
-        GameOver();
+        // 检查这个客户端是否是被抓住的玩家
+        if (NetworkManager.Singleton.LocalClientId == caughtPlayerId)
+        {
+            GameOver();
+        }
+        else
+        {
+            Debug.Log($"Player {caughtPlayerId} was caught, but I'm player {NetworkManager.Singleton.LocalClientId} - continuing game");
+        }
     }
     
     void GameOver()
     {
         gameOver = true;
         
-        if (gameOverPanel != null)
-            gameOverPanel.SetActive(true);
-        if (gameOverText != null)
-            gameOverText.text = "Game Over! The chaser caught you!";
+        // 显示Lose UI
+        if (loseUI != null)
+        {
+            loseUI.SetActive(true);
+            Debug.Log("Game Over - Showing Lose UI (I was caught!)");
+        }
+        else
+        {
+            Debug.LogError("Lose UI is null! Cannot show game over screen.");
+        }
+        
+        // 立即禁用玩家控制
+        DisablePlayerControl();
         
         Time.timeScale = 0f;
     }
     
-    public void RestartGame()
+    void DisablePlayerControl()
     {
-        Time.timeScale = 1f;
-        
-        if (IsServer)
+        // 找到本地玩家并禁用控制
+        var localPlayerObject = NetworkManager.Singleton?.LocalClient?.PlayerObject;
+        if (localPlayerObject != null)
         {
-            NetworkManager.Singleton.SceneManager.LoadScene(
-                SceneManager.GetActiveScene().name, 
-                UnityEngine.SceneManagement.LoadSceneMode.Single);
+            // 禁用Character组件
+            var character = localPlayerObject.GetComponent<Character>();
+            if (character != null)
+            {
+                character.enabled = false;
+                Debug.Log("Disabled Character component");
+            }
+            
+            // 将玩家移到安全位置
+            localPlayerObject.transform.position = new Vector3(100f, 100f, 0f);
+            Debug.Log("Moved player to safe position");
+            
+            // 可选：禁用碰撞器
+            var collider = localPlayerObject.GetComponent<Collider2D>();
+            if (collider != null)
+            {
+                collider.enabled = false;
+                Debug.Log("Disabled player collider");
+            }
         }
         else
         {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+            Debug.LogWarning("Could not find local player object to disable control");
         }
     }
     
+    
     public void ReturnToMainMenu()
     {
+        Debug.Log("Returning to Main Menu");
         Time.timeScale = 1f;
         
-        if (IsServer)
+        // 隐藏Lose UI
+        if (loseUI != null)
         {
-            NetworkManager.Singleton.SceneManager.LoadScene(
-                "MainMenu", 
-                UnityEngine.SceneManagement.LoadSceneMode.Single);
+            loseUI.SetActive(false);
+            Debug.Log("Lose UI hidden");
+        }
+        
+        // 显示MainMenu UI
+        if (mainMenuUI != null)
+        {
+            mainMenuUI.SetActive(true);
+            Debug.Log("MainMenu UI shown");
         }
         else
         {
-            SceneManager.LoadScene("MainMenu");
+            Debug.LogError("MainMenu UI is null!");
         }
+        
+        // 重置这个玩家的游戏状态
+        gameOver = false;
+        
+        // 移除玩家角色（不影响其他玩家）
+        RemovePlayerCharacter();
+        
+        Debug.Log("Player returned to main menu and character removed");
+    }
+    
+    void RemovePlayerCharacter()
+    {
+        // 只移除本地玩家，不影响其他玩家
+        if (NetworkManager.Singleton != null)
+        {
+            var localPlayerObject = NetworkManager.Singleton.LocalClient?.PlayerObject;
+            if (localPlayerObject != null)
+            {
+                Debug.Log($"Found local player: {localPlayerObject.name}");
+                
+                if (IsServer)
+                {
+                    // 服务器直接销毁
+                    localPlayerObject.Despawn(true);
+                    Debug.Log("Local player character despawned (server)");
+                }
+                else
+                {
+                    // 客户端请求服务器销毁
+                    RequestDestroyMyPlayerServerRpc(NetworkManager.Singleton.LocalClientId);
+                }
+            }
+        }
+    }
+    
+    [ServerRpc]
+    void RequestDestroyMyPlayerServerRpc(ulong clientId)
+    {
+        // 服务器只销毁指定客户端的玩家角色
+        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
+        {
+            if (client.PlayerObject != null)
+            {
+                client.PlayerObject.Despawn(true);
+                Debug.Log($"Player character despawned for client {clientId}");
+            }
+        }
+    }
+    
+    // Add quit game method
+    public void QuitGame()
+    {
+        Debug.Log("Quitting game...");
+        
+        #if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+        #else
+            Application.Quit();
+        #endif
     }
 
     void OnDrawGizmos()
