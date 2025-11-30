@@ -39,6 +39,7 @@ namespace Resources.Scripts
 
         public static void Run(DialogueData target, Action onFinished = null)
         {
+            if (Inst.gameObject.activeSelf) return;
             _target = target;
             _onFinished = onFinished;
             Inst.Show(true); 
