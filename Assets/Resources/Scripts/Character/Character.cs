@@ -22,6 +22,7 @@ namespace Resources.Scripts
             _animator = GetComponent<Animator>(); 
              
             Inventory.OnListChanged += HUD.UpdateInventory; 
+            Inventory.OnListChanged += HUD.UpdateStatus; 
             CurrentHealth.OnValueChanged += HUD.UpdateHealth;
             MaxHealth.OnValueChanged += HUD.UpdateHealth;
             
