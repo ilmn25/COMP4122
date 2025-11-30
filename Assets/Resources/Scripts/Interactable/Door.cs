@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Unity.Netcode;
 
 namespace Resources.Scripts
 {
@@ -16,7 +17,8 @@ namespace Resources.Scripts
         public string doorPassword = "1234";
         
         private SpriteRenderer _spriteRenderer;
-        private bool _isOpen = false;
+        private NetworkVariable<bool> _isOpen = new NetworkVariable<bool>(false);
+        private NetworkVariable<bool> _isUnlocked = new NetworkVariable<bool>(false);
         private GameObject _colliderObject;
         private PasswordLockUI _passwordUI;
         private Character _currentCharacter;
@@ -32,11 +34,12 @@ namespace Resources.Scripts
                 _passwordUI = uiObject.GetComponentInChildren<PasswordLockUI>(true);
             }
             
-            if (_passwordUI == null)
-            {
-                _passwordUI = FindObjectOfType<PasswordLockUI>(true);
-            }
-            
+            _isOpen.OnValueChanged += OnDoorStateChanged;
+            UpdateDoorVisuals();
+        }
+        
+        private void OnDoorStateChanged(bool previousValue, bool newValue)
+        {
             UpdateDoorVisuals();
         }
         
@@ -44,13 +47,13 @@ namespace Resources.Scripts
         {
             _currentCharacter = character;
             
-            if (!_isOpen)
+            if (!_isOpen.Value)
             {
                 TryOpenDoor(character);
             }
             else
             {
-                CloseDoor();
+                CloseDoorServerRpc();
             }
             
             Audio.PlaySfx(AudioClipID.Item);
@@ -61,18 +64,28 @@ namespace Resources.Scripts
             switch (doorType)
             {
                 case DoorType.Normal:
-                    OpenDoor();
+                    OpenDoorServerRpc();
                     break;
                     
                 case DoorType.Secure:
-                    ShowPasswordUI();
+                    if (character.IsOwner)
+                    {
+                        if (_isUnlocked.Value)
+                        {
+                            OpenDoorServerRpc();
+                        }
+                        else
+                        {
+                            ShowPasswordUI();
+                        }
+                    }
                     break;
             }
         }
         
         private void ShowPasswordUI()
         {
-            if (_passwordUI != null)
+            if (_passwordUI != null && !_isUnlocked.Value)
             {
                 _passwordUI.Initialize(doorPassword, this, OnPasswordAttempt);
                 _passwordUI.ShowPanel();
@@ -83,42 +96,47 @@ namespace Resources.Scripts
         {
             if (isCorrect)
             {
-                OpenDoor();
+                UnlockDoorServerRpc();
+                OpenDoorServerRpc();
                 _passwordUI?.ClosePanel();
             }
         }
         
-        private void OpenDoor()
+        [ServerRpc(RequireOwnership = false)]
+        private void OpenDoorServerRpc()
         {
-            _isOpen = true;
-            UpdateDoorVisuals();
-            
-            if (_colliderObject != null)
-            {
-                _colliderObject.SetActive(false);
-            }
+            _isOpen.Value = true;
         }
         
-        private void CloseDoor()
+        [ServerRpc(RequireOwnership = false)]
+        private void CloseDoorServerRpc()
         {
-            _isOpen = false;
-            UpdateDoorVisuals();
-            
-            if (_colliderObject != null)
-            {
-                _colliderObject.SetActive(true);
-            }
+            _isOpen.Value = false;
+        }
+        
+        [ServerRpc(RequireOwnership = false)]
+        private void UnlockDoorServerRpc()
+        {
+            _isUnlocked.Value = true;
         }
         
         private void UpdateDoorVisuals()
         {
-            if (_isOpen)
+            if (_isOpen.Value)
             {
                 _spriteRenderer.sprite = Cache.LoadSprite(isFaceFront ? "Door2" : "Door1");
+                if (_colliderObject != null)
+                {
+                    _colliderObject.SetActive(false);
+                }
             }
             else
             {
                 _spriteRenderer.sprite = Cache.LoadSprite(isFaceFront ? "Door1" : "Door2");
+                if (_colliderObject != null)
+                {
+                    _colliderObject.SetActive(true);
+                }
             }
         }
         
@@ -126,17 +144,22 @@ namespace Resources.Scripts
         {
             if (open)
             {
-                OpenDoor();
+                OpenDoorServerRpc();
             }
             else
             {
-                CloseDoor();
+                CloseDoorServerRpc();
             }
         }
         
         public bool IsOpen()
         {
-            return _isOpen;
+            return _isOpen.Value;
+        }
+        
+        public bool IsUnlocked()
+        {
+            return _isUnlocked.Value;
         }
     }
 }
