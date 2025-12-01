@@ -46,14 +46,19 @@ namespace Resources.Scripts
         {
             if (IsOwner) HandleMovement(); 
             HandleAnimation();
-            HandleInteraction();
+            if (CurrentHealth.Value > 0) HandleInteraction();
         }
 
         private void HandleAnimation()
         {
             bool isMoving = Direction != Vector2.zero;
 
-            if (isMoving)
+            if (CurrentHealth.Value == 0)
+            {
+                if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Dead"))
+                    RequestPlayAnimationServerRpc("Dead", 0, 1);
+            } 
+            else if (isMoving)
                 RequestPlayAnimationServerRpc("Move", 0, _currentSpeed / Speed);   
             else
                 RequestPlayAnimationServerRpc("Idle", 0, 1);

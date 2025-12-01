@@ -19,7 +19,7 @@ namespace Resources.Scripts
                 SetLootedServerRpc();
                 Dialogue.Run(new DialogueData {Text = "Ahh!"}, () =>
                 {
-                    character.TakeDamageServerRpc();
+                    character.ChangeHealthServerRpc();
                 });
             }
             else

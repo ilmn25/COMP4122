@@ -22,7 +22,7 @@ namespace Resources.Scripts
             {
                 while (true)
                 {
-                    yield return new WaitForSeconds(0.6f);
+                    yield return new WaitForSeconds(1f);
                     Scan();
                 }
             }
@@ -38,7 +38,7 @@ namespace Resources.Scripts
 
         protected override void OnTouch(Character character)
         {
-            character.TakeDamageServerRpc();
+            character.ChangeHealthServerRpc();
         }
     }
 }

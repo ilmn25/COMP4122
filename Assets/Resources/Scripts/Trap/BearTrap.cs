@@ -17,7 +17,7 @@ namespace Resources.Scripts
             _triggered = true;
             Animator animator = GetComponent<Animator>();
             animator.Play(animator.GetCurrentAnimatorStateInfo(0).shortNameHash, -1, 0f);
-            character.TakeDamageServerRpc();
+            character.ChangeHealthServerRpc();
             character.Status.Add((int)StatusID.Stuck);
         }
     }

@@ -25,7 +25,7 @@ namespace Resources.Scripts
 
         protected override void OnTouch(Character character)
         {
-            character.TakeDamageServerRpc();
+            character.ChangeHealthServerRpc();
         }
     }
 }
