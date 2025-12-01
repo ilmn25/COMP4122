@@ -30,10 +30,10 @@ namespace Resources.Scripts
                             {
                                 "", new DialogueData
                                 {
-                                    Text = "we are all dead",
+                                    Text = "We are all dead",
                                     Next = new Dictionary<string, DialogueData>
                                     {
-                                        { "", new DialogueData { Text = "the end." } }
+                                        { "", new DialogueData { Text = "The end." } }
                                     }
                                 }
                             }
@@ -49,10 +49,10 @@ namespace Resources.Scripts
                         {
                             "", new DialogueData
                             {
-                                Text = "everyone escape blahwdaowhda",
+                                Text = "Everyone escaped.",
                                 Next = new Dictionary<string, DialogueData>
                                 {
-                                    { "", new DialogueData { Text = "the end." } }
+                                    { "", new DialogueData { Text = "The end." } }
                                 }
                             }
                         }

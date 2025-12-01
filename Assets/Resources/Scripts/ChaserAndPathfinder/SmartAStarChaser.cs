@@ -13,6 +13,8 @@ public class SmartAStarChaser : NetworkBehaviour
     public float recalculatePathInterval = 0.5f;
     public float catchDistance = 0.5f;
     public float pathFollowingDistance = 0.3f;
+    public float catchCooldown = 2f;
+    private float nextCatchTime = 0f;
     
     [Header("Vision Settings")]
     public float visionRange = 8f;
@@ -34,7 +36,6 @@ public class SmartAStarChaser : NetworkBehaviour
     private float lastPathRecalculationTime;
     private float lastPatrolPathRecalculationTime;
     private bool seesPlayer;
-    private bool gameOver = false;
     
     // Movement
     private Vector2 currentVelocity;
@@ -59,12 +60,10 @@ public class SmartAStarChaser : NetworkBehaviour
     {
         if (!IsServer) 
         {
-            Debug.Log("Chaser: Client mode, AI disabled");
             enabled = false;
             return;
         }
         
-        Debug.Log("Chaser: Server mode, initializing AI");
         currentPath = new List<Vector3>();
         patrolStartPosition = transform.position;
         currentState = ChaserState.Patrolling;
@@ -131,13 +130,7 @@ public class SmartAStarChaser : NetworkBehaviour
     
     void RecalculatePatrolPath()
     {
-        if (AStarPathfinder.Instance == null) 
-        {
-            Debug.LogError("AStarPathfinder instance is null!");
-            return;
-        }
-        
-        Debug.Log($"Calculating patrol path: {transform.position} -> {currentPatrolTarget}");
+        if (AStarPathfinder.Instance == null) return;
         
         currentPath = AStarPathfinder.Instance.FindPath(transform.position, currentPatrolTarget);
         currentPathIndex = 0;
@@ -180,7 +173,6 @@ public class SmartAStarChaser : NetworkBehaviour
         if (Vector2.Distance(transform.position, targetPosition) < pathFollowingDistance)
         {
             currentPathIndex++;
-            Debug.Log($"Reached patrol path point {currentPathIndex-1}/{currentPath.Count}");
             
             // If reached path end, set new patrol target
             if (currentPathIndex >= currentPath.Count)
@@ -189,7 +181,6 @@ public class SmartAStarChaser : NetworkBehaviour
                 isIdle = true;
                 idleTimer = 0f;
                 currentPath = new List<Vector3>();
-                Debug.Log("Reached patrol point, resting...");
             }
         }
     }
@@ -199,7 +190,6 @@ public class SmartAStarChaser : NetworkBehaviour
         // Check if target is lost
         if (currentTarget == null || !IsTargetInRange(currentTarget))
         {
-            Debug.Log("Target lost, returning to patrol");
             currentState = ChaserState.Returning;
             currentTarget = null;
             currentPath = new List<Vector3>();
@@ -213,7 +203,6 @@ public class SmartAStarChaser : NetworkBehaviour
             if (players.Count == 0) return;
         }
         
-        CheckCatchPlayer();
         seesPlayer = CheckPlayerVision();
         
         if (Time.time - lastPathRecalculationTime > recalculatePathInterval || 
@@ -224,6 +213,7 @@ public class SmartAStarChaser : NetworkBehaviour
         }
         
         FollowPath();
+        CheckCatchPlayer();
     }
     
     void UpdateReturning()
@@ -234,11 +224,6 @@ public class SmartAStarChaser : NetworkBehaviour
             // Calculate return path
             currentPath = AStarPathfinder.Instance?.FindPath(transform.position, patrolStartPosition);
             currentPathIndex = 0;
-            
-            if (currentPath != null && currentPath.Count > 0)
-            {
-                Debug.Log("Starting return to start position");
-            }
         }
         
         if (currentPath != null && currentPath.Count > 0 && currentPathIndex < currentPath.Count)
@@ -266,7 +251,6 @@ public class SmartAStarChaser : NetworkBehaviour
                 currentState = ChaserState.Patrolling;
                 currentPath = new List<Vector3>();
                 SetRandomPatrolTarget();
-                Debug.Log("Returned to start position, starting patrol");
             }
         }
         else
@@ -275,7 +259,6 @@ public class SmartAStarChaser : NetworkBehaviour
             transform.position = patrolStartPosition;
             currentState = ChaserState.Patrolling;
             SetRandomPatrolTarget();
-            Debug.Log("Teleported back to start position");
         }
         
         // Still check for players while returning
@@ -298,7 +281,6 @@ public class SmartAStarChaser : NetworkBehaviour
                 // Found player, start chasing
                 currentTarget = player;
                 currentState = ChaserState.Chasing;
-                Debug.Log($"Found player {player.name}, starting chase!");
                 return;
             }
         }
@@ -338,7 +320,6 @@ public class SmartAStarChaser : NetworkBehaviour
             if (hit.collider == null)
             {
                 currentPatrolTarget = potentialTarget;
-                Debug.Log($"Set new patrol target: {currentPatrolTarget}");
                 return;
             }
         }
@@ -347,7 +328,6 @@ public class SmartAStarChaser : NetworkBehaviour
         float randomAngleFinal = Random.Range(0f, 360f) * Mathf.Deg2Rad;
         Vector2 randomDirectionFinal = new Vector2(Mathf.Cos(randomAngleFinal), Mathf.Sin(randomAngleFinal));
         currentPatrolTarget = patrolStartPosition + (Vector3)randomDirectionFinal * patrolPointDistance;
-        Debug.Log($"Set default patrol target: {currentPatrolTarget}");
     }
     
     bool CheckSinglePlayerVision(Transform player)
@@ -362,10 +342,6 @@ public class SmartAStarChaser : NetworkBehaviour
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, toPlayer.normalized, distance, wallLayer);
             bool canSee = (hit.collider == null);
-            
-            if (canSee && Time.frameCount % 60 == 0)
-                Debug.Log($"Player detected within 7m range: {player.name}, distance: {distance}");
-                
             return canSee;
         }
         
@@ -409,21 +385,9 @@ public class SmartAStarChaser : NetworkBehaviour
 
     void RecalculatePath()
     {
-        if (AStarPathfinder.Instance == null) 
-        {
-            Debug.LogError("AStarPathfinder instance is null!");
-            return;
-        }
-        
-        if (currentTarget == null) 
-        {
-            Debug.LogWarning("Current target is null, cannot calculate path");
-            return;
-        }
+        if (!AStarPathfinder.Instance || !currentTarget) return;
         
         Vector3 targetPosition = seesPlayer ? currentTarget.position : GetStrategicPosition();
-        
-        Debug.Log($"Calculating chase path: {transform.position} -> {targetPosition}");
         
         currentPath = AStarPathfinder.Instance.FindPath(transform.position, targetPosition);
         currentPathIndex = 0;
@@ -454,16 +418,11 @@ public class SmartAStarChaser : NetworkBehaviour
             {
                 Vector2 moveDirection = (currentTarget.position - transform.position).normalized;
                 transform.position += (Vector3)moveDirection * (seesPlayer ? chaseSpeed : moveSpeed) * Time.deltaTime;
-                Debug.Log($"No path, direct chasing target, speed: {(seesPlayer ? chaseSpeed : moveSpeed)}");
             }
             else
             {
                 // No path and cannot see player, recalculate path
-                if (Time.frameCount % 120 == 0)
-                {
-                    Debug.Log("No path and cannot see player, recalculating path");
-                    RecalculatePath();
-                }
+                if (Time.frameCount % 120 == 0) RecalculatePath();
             }
             return;
         }
@@ -485,7 +444,6 @@ public class SmartAStarChaser : NetworkBehaviour
         if (Vector2.Distance(transform.position, targetPosition) < pathFollowingDistance)
         {
             currentPathIndex++;
-            Debug.Log($"Reached chase path point {currentPathIndex-1}/{currentPath.Count}");
             
             if (currentPathIndex >= currentPath.Count && seesPlayer)
             {
@@ -507,211 +465,44 @@ public class SmartAStarChaser : NetworkBehaviour
             RaycastHit2D hit = Physics2D.Raycast(transform.position, toPlayer.normalized, distance, wallLayer);
             bool canSee = !hit.collider;
             
-            if (Time.frameCount % 120 == 0)
-                Debug.Log($"Chasing within 7m range: distance={distance}, canSeePlayer={canSee}");
-                
             return canSee;
         }
         
         // Normal vision check outside 7m range
-        if (distance > visionRange) 
-        {
-            if (Time.frameCount % 120 == 0)
-                Debug.Log($"Player out of vision range: {distance} > {visionRange}");
-            return false;
-        }
+        if (distance > visionRange) return false;
         
         // Check vision angle
         float angle = Vector2.Angle(transform.up, toPlayer.normalized);
-        if (angle > visionAngle / 2) 
-        {
-            if (Time.frameCount % 120 == 0)
-                Debug.Log($"Player out of vision angle: {angle} > {visionAngle/2}");
-            return false;
-        }
+        if (angle > visionAngle / 2) return false;
         
         // Check if line of sight is blocked
         RaycastHit2D hit2 = Physics2D.Raycast(transform.position, toPlayer.normalized, distance, wallLayer);
         bool canSee2 = (hit2.collider == null);
         
-        if (Time.frameCount % 120 == 0)
-            Debug.Log($"Vision check: distance={distance}, angle={angle}, canSeePlayer={canSee2}");
-            
         return canSee2;
     }
-    
-    void CheckCatchPlayer()
-    {
-        if (!currentTarget) return;
-        
+
+    void CheckCatchPlayer(){
+        if(currentTarget == null) return;
+
         float distanceToPlayer = Vector2.Distance(transform.position, currentTarget.position);
-        if (distanceToPlayer <= catchDistance)
-        {
-            Debug.Log($"Caught player! Distance: {distanceToPlayer}");
-            
-            // 获取被抓住玩家的NetworkObject
-            NetworkObject caughtPlayer = currentTarget.GetComponent<NetworkObject>();
-            if (caughtPlayer)
-            {
-                // 只向被抓住的玩家发送GameOver
-                CatchPlayerClientRpc(caughtPlayer.OwnerClientId);
-            }
-            else
-            {
-                Debug.LogError("Cannot find NetworkObject on caught player");
-            }
+        if(distanceToPlayer <= catchDistance && Time.time >= nextCatchTime){
+            var obj = currentTarget.GetComponent<NetworkObject>();
+            if (obj != null) CatchPlayerClientRpc(obj.OwnerClientId); // notify the caught player and minus health
+            nextCatchTime = Time.time + catchCooldown;
         }
     }
-    
+
+    // all client received the RPC call but only the one with matching player id will deduct health
     [ClientRpc]
-    void CatchPlayerClientRpc(ulong caughtPlayerId)
+    void CatchPlayerClientRpc(ulong playerID) 
     {
-        // 检查这个客户端是否是被抓住的玩家
-        if (NetworkManager.Singleton.LocalClientId == caughtPlayerId)
-        {
-            GameOver();
-        }
-        else
-        {
-            Debug.Log($"Player {caughtPlayerId} was caught, but I'm player {NetworkManager.Singleton.LocalClientId} - continuing game");
-        }
-    }
-    
-    void GameOver()
-    {
-        gameOver = true;
-        
-        // 显示Lose UI
-        if (loseUI != null)
-        {
-            loseUI.SetActive(true);
-            Debug.Log("Game Over - Showing Lose UI (I was caught!)");
-        }
-        else
-        {
-            Debug.LogError("Lose UI is null! Cannot show game over screen.");
-        }
-        
-        // 立即禁用玩家控制
-        DisablePlayerControl();
-        
-        Time.timeScale = 0f;
-    }
-    
-    void DisablePlayerControl()
-    {
-        // 找到本地玩家并禁用控制
-        var localPlayerObject = NetworkManager.Singleton?.LocalClient?.PlayerObject;
-        if (localPlayerObject != null)
-        {
-            // 禁用Character组件
-            var character = localPlayerObject.GetComponent<Character>();
-            if (character != null)
-            {
-                character.enabled = false;
-                Debug.Log("Disabled Character component");
-            }
-            
-            // 将玩家移到安全位置
-            localPlayerObject.transform.position = new Vector3(100f, 100f, 0f);
-            Debug.Log("Moved player to safe position");
-            
-            // 可选：禁用碰撞器
-            var collider = localPlayerObject.GetComponent<Collider2D>();
-            if (collider != null)
-            {
-                collider.enabled = false;
-                Debug.Log("Disabled player collider");
-            }
-        }
-        else
-        {
-            Debug.LogWarning("Could not find local player object to disable control");
-        }
-    }
-    
-    
-    public void ReturnToMainMenu()
-    {
-        Debug.Log("Returning to Main Menu");
-        Time.timeScale = 1f;
-        
-        // 隐藏Lose UI
-        if (loseUI != null)
-        {
-            loseUI.SetActive(false);
-            Debug.Log("Lose UI hidden");
-        }
-        
-        // 显示MainMenu UI
-        if (mainMenuUI != null)
-        {
-            mainMenuUI.SetActive(true);
-            Debug.Log("MainMenu UI shown");
-        }
-        else
-        {
-            Debug.LogError("MainMenu UI is null!");
-        }
-        
-        // 重置这个玩家的游戏状态
-        gameOver = false;
-        
-        // 移除玩家角色（不影响其他玩家）
-        RemovePlayerCharacter();
-        
-        Debug.Log("Player returned to main menu and character removed");
-    }
-    
-    void RemovePlayerCharacter()
-    {
-        // 只移除本地玩家，不影响其他玩家
-        if (NetworkManager.Singleton != null)
-        {
-            var localPlayerObject = NetworkManager.Singleton.LocalClient?.PlayerObject;
-            if (localPlayerObject != null)
-            {
-                Debug.Log($"Found local player: {localPlayerObject.name}");
-                
-                if (IsServer)
-                {
-                    // 服务器直接销毁
-                    localPlayerObject.Despawn(true);
-                    Debug.Log("Local player character despawned (server)");
-                }
-                else
-                {
-                    // 客户端请求服务器销毁
-                    RequestDestroyMyPlayerServerRpc(NetworkManager.Singleton.LocalClientId);
-                }
-            }
-        }
-    }
-    
-    [ServerRpc]
-    void RequestDestroyMyPlayerServerRpc(ulong clientId)
-    {
-        // 服务器只销毁指定客户端的玩家角色
-        if (NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
-        {
-            if (client.PlayerObject != null)
-            {
-                client.PlayerObject.Despawn(true);
-                Debug.Log($"Player character despawned for client {clientId}");
-            }
-        }
-    }
-    
-    // Add quit game method
-    public void QuitGame()
-    {
-        Debug.Log("Quitting game...");
-        
-        #if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-        #else
-            Application.Quit();
-        #endif
+        if (NetworkManager.Singleton.LocalClientId != playerID) return;
+
+        var player = NetworkManager.Singleton.LocalClient.PlayerObject; // find the player
+        var stats = player.GetComponent<Character>();
+
+        if (player != null && stats != null) stats.ChangeHealthServerRpc(); // minus heatlh
     }
 
     void OnDrawGizmos()

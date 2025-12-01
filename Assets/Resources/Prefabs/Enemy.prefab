@@ -100,7 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1259794956
+  GlobalObjectIdHash: 3015499759
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -122,10 +122,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   moveSpeed: 7
-  chaseSpeed: 9
+  chaseSpeed: 8
   recalculatePathInterval: 0.5
   catchDistance: 0.4
   pathFollowingDistance: 0.3
+  catchCooldown: 2
   visionRange: 8
   visionAngle: 180
   loseSightRange: 14
