@@ -54,7 +54,6 @@ namespace Resources.Scripts
             {
                 CloseDoorServerRpc();
             }
-           
             Audio.PlaySfx(AudioClipID.Item);
         }
        
@@ -62,7 +61,7 @@ namespace Resources.Scripts
         {
             switch (doorType)
             {
-                case DoorType.Normal:
+                case DoorType.Normal: 
                     OpenDoorServerRpc();
                     break;
                    
@@ -84,7 +83,7 @@ namespace Resources.Scripts
        
         private void ShowPasswordUI()
         {
-            if (_passwordUI != null && !_isUnlocked.Value)
+            if (!_isUnlocked.Value)
             {
                 _passwordUI.Initialize(doorPassword, this, OnPasswordAttempt);
                 _passwordUI.ShowPanel();
@@ -95,6 +94,7 @@ namespace Resources.Scripts
         {
             if (isCorrect)
             {
+                Audio.PlaySfx(AudioClipID.Item);
                 UnlockDoorServerRpc();
                 OpenDoorServerRpc();
                 _passwordUI?.ClosePanel();
@@ -123,7 +123,7 @@ namespace Resources.Scripts
         {
             if (_isOpen.Value)
             {
-                _spriteRenderer.sprite = Cache.LoadSprite(isFaceFront ? "Door2" : "Door1");
+                _spriteRenderer.sprite = Cache.LoadSprite(isFaceFront ? "Door4" : "Door3");
                 if (_colliderObject != null)
                 {
                     _colliderObject.SetActive(false);
