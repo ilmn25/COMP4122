@@ -100,7 +100,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 275796572
+  GlobalObjectIdHash: 729823955
   InScenePlacedSourceGlobalObjectIdHash: 704789019
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -169,10 +169,8 @@ MonoBehaviour:
   activationTime: 5
   checkInterval: 0.1
   interactionRange: 2
-  _text3D: {fileID: 0}
   generatorCanvas: {fileID: 1531765874485017555}
   progressTextUI: {fileID: 4206622313382856330}
-  canvasOffset: {x: 0, y: 2, z: 0}
 --- !u!1 &6196926660125895757
 GameObject:
   m_ObjectHideFlags: 0
@@ -342,8 +340,8 @@ MonoBehaviour:
       m_Calls: []
   m_text: Text
   m_isRightToLeft: 0
-  m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_fontAsset: {fileID: 11400000, guid: ec91fa2440ae4f55853be1e16ece1e95, type: 2}
+  m_sharedMaterial: {fileID: -4486078137813936661, guid: ec91fa2440ae4f55853be1e16ece1e95, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
