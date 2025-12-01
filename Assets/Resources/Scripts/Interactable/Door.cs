@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using Unity.Netcode;
+using UnityEngine.Serialization;
 
 namespace Resources.Scripts
 {
@@ -8,13 +9,14 @@ namespace Resources.Scripts
         public enum DoorType
         {
             Normal,
-            Secure      
+            Code,
+            Key,
         }
        
         public DoorType doorType;
         public bool isFaceFront;
-        [Header("Password Settings")]
-        public string doorPassword = "1234";
+        public string text = "1234";
+        public ItemID item = ItemID.Key;
         
         private SpriteRenderer _spriteRenderer;
         private readonly NetworkVariable<bool> _isOpen = new NetworkVariable<bool>(false);
@@ -48,44 +50,38 @@ namespace Resources.Scripts
         {
             if (!_isOpen.Value)
             {
-                TryOpenDoor(character);
+                switch (doorType)
+                {
+                    case DoorType.Normal: 
+                        OpenDoorServerRpc();
+                        break;
+                    case DoorType.Code: 
+                        if (_isUnlocked.Value)
+                            OpenDoorServerRpc();
+                        else
+                            ShowPasswordUI();
+                        break;
+                    case DoorType.Key:
+                        if (_isUnlocked.Value)
+                            OpenDoorServerRpc();
+                        else if (character.Inventory.Contains((int)item))
+                            UnlockDoorServerRpc();
+                        else 
+                            Dialogue.Run(new DialogueData{Text = text});
+                        break;
+                };
             }
             else
-            {
                 CloseDoorServerRpc();
-            }
             Audio.PlaySfx(AudioClipID.Item);
         }
-       
-        private void TryOpenDoor(Character character)
-        {
-            switch (doorType)
-            {
-                case DoorType.Normal: 
-                    OpenDoorServerRpc();
-                    break;
-                   
-                case DoorType.Secure:
-                    if (character.IsOwner)
-                    {
-                        if (_isUnlocked.Value)
-                        {
-                            OpenDoorServerRpc();
-                        }
-                        else
-                        {
-                            ShowPasswordUI();
-                        }
-                    }
-                    break;
-            }
-        }
+        
        
         private void ShowPasswordUI()
         {
             if (!_isUnlocked.Value)
             {
-                _passwordUI.Initialize(doorPassword, this, OnPasswordAttempt);
+                _passwordUI.Initialize(text, this, OnPasswordAttempt);
                 _passwordUI.ShowPanel();
             }
         }
