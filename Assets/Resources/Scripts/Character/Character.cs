@@ -76,8 +76,7 @@ namespace Resources.Scripts
         private readonly Vector2 _colliderOffset = new (0, 0.2f);
         private readonly Vector2 _colliderSize = new (0.55f, 0.55f);   
         private const float SlideToward = 0.06f; // 直接问我
-        private const float SlideAlong = 0.03f;
-        private static readonly Collider2D[] ColliderArray = new Collider2D[8];
+        private const float SlideAlong = 0.03f; 
         
         private void HandleMovement()
         {
@@ -97,7 +96,7 @@ namespace Resources.Scripts
             
             bool IsNotCollide(Vector2 pos)
             {
-                return Physics2D.OverlapBoxNonAlloc(pos + _colliderOffset, _colliderSize, 0, ColliderArray, Main.MaskStatic) == 0; 
+                return Physics2D.OverlapBoxNonAlloc(pos + _colliderOffset, _colliderSize, 0, Main.ColliderArray, Main.MaskStatic) == 0; 
             }
             
             Vector3 GetNonCollidePosition(Vector3 targetPos)
@@ -145,14 +144,14 @@ namespace Resources.Scripts
         private void HandleInteraction()
         {
             int hitCount = Physics2D.OverlapBoxNonAlloc(transform.position + new Vector3(_colliderOffset.x, _colliderOffset.y, 0), 
-            _colliderSize, 0, ColliderArray, Main.MaskInteractable);
+            _colliderSize, 0, Main.ColliderArray, Main.MaskInteractable);
 
             Interactable nearest = null;
             float nearestSqr = float.MaxValue;
 
             for (int i = 0; i < hitCount; i++)
             {
-                var col = ColliderArray[i];
+                var col = Main.ColliderArray[i];
                 if (!col) continue;
                 if (!col.TryGetComponent<Interactable>(out var pickable)) continue; // not pickable
 
