@@ -54,20 +54,21 @@ namespace Resources.Scripts
             bool isMoving = Direction != Vector2.zero;
 
             if (isMoving)
-            {
-                _animator.speed = _currentSpeed / Speed;
-                _animator.Play("Move", 0);  
-            }
+                RequestPlayAnimationServerRpc("Move", 0, _currentSpeed / Speed);   
             else
-            {
-                _animator.speed = 1;
-                _animator.Play("Idle", 0);
-            }
+                RequestPlayAnimationServerRpc("Idle", 0, 1);
 
             if (Direction.x < 0)    
-                _animator.Play("Left", 1); 
+                RequestPlayAnimationServerRpc("Left", 1); 
             else if (Direction.x > 0)
-                _animator.Play("Right", 1);
+                RequestPlayAnimationServerRpc("Right", 1);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        private void RequestPlayAnimationServerRpc(string stateName, int layer, float speed = -1)
+        {
+            if (layer == 0) _animator.speed = speed;
+            _animator.Play(stateName, layer);  
         }
     }
     public partial class Character //everything collision and movement related
