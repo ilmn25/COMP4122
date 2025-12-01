@@ -36,17 +36,27 @@ namespace Resources.Scripts
                 Next = new Dictionary<string, DialogueData>
                 {
                     { "", new DialogueData {
-                            Text = "haily forgot to pay taxes and is going to get arrested for 10 years", 
+                            Text = "Packing your bags, you and your friends set out on a mission to explore\nthe renowned Chungking Mansion", 
                             Sprite = Cache.LoadSprite("PlayerDialogue"),
                             Next = new Dictionary<string, DialogueData>
                             {
-                                { "", new DialogueData { Text = "so she's hiding in chognxin daxia", 
-                                    Sprite = Cache.LoadSprite("PlayerDialogue")}}
-                            }
+                                { "", new DialogueData { 
+                                    Text = "However... it seems you stumbled upon something that you shouldn't have.", 
+                                    Sprite = Cache.LoadSprite("PlayerDialogue"),
+                                    Next = new Dictionary<string, DialogueData>
+                                    {
+                                        { "", new DialogueData { 
+                                            Text = "Try to escape the building.",
+                                            Sprite = Cache.LoadSprite("PlayerDialogue")    
+                                        }}
+                                    }
+                                }
+                            }}
                         } 
                     }
                 }
             }, () => _ = new CoroutineTask(OnDialogueEnd()));
+            
             IEnumerator OnDialogueEnd()
             {
                 AddWaitingServerRpc();
