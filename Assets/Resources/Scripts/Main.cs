@@ -12,6 +12,7 @@ namespace Resources.Scripts
     
     public class Main : MonoBehaviour
     {
+        public static readonly Collider2D[] ColliderArray = new Collider2D[20];
         public static Main Instance; 
         public static Character TargetPlayer;
         public static GameObject ViewportObject;

@@ -64,7 +64,6 @@ namespace Resources.Scripts
             {
                 door.SetDoorState(false); 
             }
-            
 
             if (HUD.Inst != null)
                 HUD.Inst.gameObject.SetActive(false);
