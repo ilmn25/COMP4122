@@ -1,30 +1,68 @@
 using UnityEngine;
 using Unity.Netcode;
+using System.Collections.Generic;
 
 namespace Resources.Scripts
 {
     public class WinZone : Interactable
     {
+        private HashSet<ulong> playersReached = new HashSet<ulong>();
+        private NetworkVariable<bool> winTriggered = new NetworkVariable<bool>(false);
+        
         public override void Interact(Character character)
         {
             if (character.IsOwner)
             {
-                TriggerWinServerRpc(character.OwnerClientId);
+                RegisterPlayerReachedServerRpc(character.OwnerClientId);
             }
         }
         
         [ServerRpc(RequireOwnership = false)]
-        private void TriggerWinServerRpc(ulong clientId)
+        private void RegisterPlayerReachedServerRpc(ulong clientId)
         {
-            TriggerWinClientRpc(clientId);
+            if (playersReached.Contains(clientId))
+                return;
+                
+            playersReached.Add(clientId);
+            
+            CheckWinCondition();
+        }
+        
+        private void CheckWinCondition()
+        {
+            if (winTriggered.Value) return;
+            
+            int totalPlayers = NetworkManager.Singleton.ConnectedClients.Count;
+            
+            if (playersReached.Count >= totalPlayers && totalPlayers > 0)
+            {
+                winTriggered.Value = true;
+                TriggerWinForAllClientRpc();
+            }
         }
         
         [ClientRpc]
-        private void TriggerWinClientRpc(ulong clientId)
+        private void TriggerWinForAllClientRpc()
         {
-            if (NetworkManager.Singleton.LocalClientId == clientId)
+            WinUI.Instance?.ShowWinUI();
+        }
+        
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+            
+            if (IsServer)
             {
-                WinUI.Instance?.ShowWinUI();
+                NetworkManager.Singleton.OnClientDisconnectCallback += OnClientDisconnected;
+            }
+        }
+        
+        private void OnClientDisconnected(ulong clientId)
+        {
+            if (IsServer && !winTriggered.Value)
+            {
+                playersReached.Remove(clientId);
+                CheckWinCondition();
             }
         }
         
@@ -35,6 +73,15 @@ namespace Resources.Scripts
             {
                 Interact(character);
             }
+        }
+        
+        public override void OnNetworkDespawn()
+        {
+            if (IsServer)
+            {
+                NetworkManager.Singleton.OnClientDisconnectCallback -= OnClientDisconnected;
+            }
+            base.OnNetworkDespawn();
         }
     }
 }
