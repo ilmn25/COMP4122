@@ -3,8 +3,10 @@ using UnityEngine;
 
 namespace Resources.Scripts
 {
-    public class BearTrap : Trap
+    public class Trigger : Trap
     {
+        [TextArea] public string[] text; // pass in text in the inspector
+
         private bool _triggered;
         private void FixedUpdate()
         {
@@ -14,9 +16,7 @@ namespace Resources.Scripts
         protected override void OnTouch(Character character)
         {
             _triggered = true;
-            GetComponent<SpriteRenderer>().sprite = Cache.LoadSprite("BearTrap2");
-            character.ChangeHealthServerRpc();
-            character.Status.Add((int)StatusID.Stuck);
+            Dialogue.Run(Clue.BuildDialogueData(text));
         }
     }
 }

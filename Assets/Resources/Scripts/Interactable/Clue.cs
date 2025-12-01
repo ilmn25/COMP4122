@@ -14,7 +14,7 @@ namespace Resources.Scripts
             Audio.PlaySfx(AudioClipID.Item);
         }
         
-        private DialogueData BuildDialogueData(string[] lines)
+        public static DialogueData BuildDialogueData(string[] lines)
         {
             if (lines == null || lines.Length == 0) return new DialogueData { Text = "" };
         
