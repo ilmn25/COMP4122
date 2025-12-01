@@ -17764,7 +17764,7 @@ Transform:
   m_GameObject: {fileID: 922969875}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -13.2, y: 3.9, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -17784,10 +17784,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   nodeSize: 1
-  gridWidth: 130
-  gridHeight: 102
+  gridWidth: 94
+  gridHeight: 70
 --- !u!114 &922969880
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23586,7 +23586,6 @@ Transform:
   - {fileID: 153624338}
   - {fileID: 684069498}
   - {fileID: 1647554828}
-  - {fileID: 1677808783}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1493224949 stripped
@@ -26036,133 +26035,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9364c6d212744cd881f6420601722aa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!1001 &1677808782
-PrefabInstance:
-  m_ObjectHideFlags: 0
-  serializedVersion: 2
-  m_Modification:
-    serializedVersion: 3
-    m_TransformParent: {fileID: 1487490814}
-    m_Modifications:
-    - target: {fileID: 206844540193363167, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: GlobalObjectIdHash
-      value: 1842111756
-      objectReference: {fileID: 0}
-    - target: {fileID: 206844540193363167, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: InScenePlacedSourceGlobalObjectIdHash
-      value: 779724900
-      objectReference: {fileID: 0}
-    - target: {fileID: 920788797033432243, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -5.94
-      objectReference: {fileID: 0}
-    - target: {fileID: 920788797033432243, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: -26.43
-      objectReference: {fileID: 0}
-    - target: {fileID: 920788797033432243, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 920788797033432243, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 920788797033432243, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_LocalRotation.x
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 920788797033432243, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_LocalRotation.y
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 920788797033432243, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_LocalRotation.z
-      value: -0
-      objectReference: {fileID: 0}
-    - target: {fileID: 920788797033432243, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 920788797033432243, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 920788797033432243, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1097053631363519682, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: clueText
-      value: "It's a page from a kid's homework. \n\n\"x = 3y + 4, y = -1, x = _\""
-      objectReference: {fileID: 0}
-    - target: {fileID: 1097053631363519682, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: clueText.Array.size
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 1097053631363519682, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: clueText.Array.data[0]
-      value: Day 11,
-      objectReference: {fileID: 0}
-    - target: {fileID: 1097053631363519682, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: clueText.Array.data[1]
-      value: We were searching for anything we could use, but one of the chests were
-        trapped...
-      objectReference: {fileID: 0}
-    - target: {fileID: 1097053631363519682, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: clueText.Array.data[2]
-      value: ...
-      objectReference: {fileID: 0}
-    - target: {fileID: 1097053631363519682, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: clueText.Array.data[3]
-      value: vicky died instantly.
-      objectReference: {fileID: 0}
-    - target: {fileID: 1490345111898236107, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_Size.x
-      value: 1.196495
-      objectReference: {fileID: 0}
-    - target: {fileID: 1490345111898236107, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_Offset.x
-      value: 0.19199753
-      objectReference: {fileID: 0}
-    - target: {fileID: 6003007577649529488, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: GlobalObjectIdHash
-      value: 1520970590
-      objectReference: {fileID: 0}
-    - target: {fileID: 6003007577649529488, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: InScenePlacedSourceGlobalObjectIdHash
-      value: 2063710585
-      objectReference: {fileID: 0}
-    - target: {fileID: 8372935280287607304, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: GlobalObjectIdHash
-      value: 978691415
-      objectReference: {fileID: 0}
-    - target: {fileID: 8372935280287607304, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: InScenePlacedSourceGlobalObjectIdHash
-      value: 4054392612
-      objectReference: {fileID: 0}
-    - target: {fileID: 8631674108195692688, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: GlobalObjectIdHash
-      value: 1920340871
-      objectReference: {fileID: 0}
-    - target: {fileID: 8631674108195692688, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: InScenePlacedSourceGlobalObjectIdHash
-      value: 3409397349
-      objectReference: {fileID: 0}
-    - target: {fileID: 8709343940356768964, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-      propertyPath: m_Name
-      value: Note (2)
-      objectReference: {fileID: 0}
-    m_RemovedComponents: []
-    m_RemovedGameObjects: []
-    m_AddedGameObjects: []
-    m_AddedComponents: []
-  m_SourcePrefab: {fileID: 100100000, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
---- !u!4 &1677808783 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 920788797033432243, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
-  m_PrefabInstance: {fileID: 1677808782}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &1686024366
 PrefabInstance:
   m_ObjectHideFlags: 0
