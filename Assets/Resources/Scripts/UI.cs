@@ -144,8 +144,7 @@ namespace Resources.Scripts
 
         private void OnBeginButtonClicked()
         { 
-            uiBeginButton.interactable = false;
-            Main.Begun = true;
+            uiBeginButton.interactable = false; 
             uiHostObject.SetActive(false);
             Cutscene.Scene.Value = 1;
         }
