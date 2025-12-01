@@ -165,8 +165,14 @@ namespace Resources.Scripts
 
             }
 
-            if (nearest && Input.GetKeyDown(KeyCode.E)) {
-                nearest.Interact(this);
+            if (nearest) 
+            {
+                HUD.InteractText.SetActive(true);
+                if (Input.GetKeyDown(KeyCode.E)) nearest.Interact(this);
+            }
+            else
+            {
+                HUD.InteractText.SetActive(false);
             }
         }
     }

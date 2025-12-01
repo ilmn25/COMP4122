@@ -10,12 +10,15 @@ namespace Resources.Scripts
     public class HUD : MonoBehaviour
     {
         public static HUD Inst;
+        public static GameObject InteractText;
         private static readonly List<Image> Health = new ();
         private static readonly List<Image> Inventory = new ();
         private static readonly List<Image> Status = new ();
         
         public void Awake()
         {
+            InteractText = GameObject.Find("InteractText");
+            InteractText.SetActive(false);
             Inst = this;
             Transform parent = transform.Find("Health"); 
             for (int i = 0; i < 5; i++) {
