@@ -16,7 +16,6 @@ namespace Resources.Scripts
             _triggered = true;
             GetComponent<SpriteRenderer>().sprite = Cache.LoadSprite("BearTrap2");
             character.ChangeHealthServerRpc();
-            character.Status.Add((int)StatusID.Stuck);
         }
     }
 }
