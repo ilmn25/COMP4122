@@ -119,6 +119,7 @@ namespace Resources.Scripts
                 Main.CanMove = true;
                 HUD.UpdateHealth(1, 1);
                 HUD.Inst.gameObject.SetActive(true);
+                Main.Begun = true;
                 yield return new WaitForSeconds(3); 
             }
         } 

@@ -15,13 +15,15 @@ namespace Resources.Scripts
         public bool isFaceFront;
         [Header("Password Settings")]
         public string doorPassword = "1234";
-       
+        
         private SpriteRenderer _spriteRenderer;
         private readonly NetworkVariable<bool> _isOpen = new NetworkVariable<bool>(false);
         private readonly NetworkVariable<bool> _isUnlocked = new NetworkVariable<bool>(false);
         private GameObject _colliderObject;
         private PasswordLockUI _passwordUI;
-       
+
+        public bool IsUnlocked => _isUnlocked.Value;
+
         private void Start()
         {
             _spriteRenderer = GetComponent<SpriteRenderer>();
