@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using Resources.Scripts;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class AStarPathfinder : MonoBehaviour
 {
@@ -7,7 +9,6 @@ public class AStarPathfinder : MonoBehaviour
     
     [Header("A* Settings")]
     public LayerMask obstacleLayer;
-    public float nodeSize = 1f;
     
     [Header("Grid Settings")]
     [Tooltip("Grid width (number of nodes)")]
@@ -15,91 +16,33 @@ public class AStarPathfinder : MonoBehaviour
     [Tooltip("Grid height (number of nodes)")]
     public int gridHeight = 50;
     
-    private Node[,] grid;
-    private Vector2 gridWorldSize;
-    private Vector3 gridBottomLeft;
+    private Node[,] _grid;
+    private Vector2Int _gridWorldSize;
+    private Vector3Int _gridBottomLeft;
     
-    void Awake()
+    private void Start()
     {
         Instance = this;
-        gridWorldSize = new Vector2(gridWidth * nodeSize, gridHeight * nodeSize);
-        
-        // Check LayerMask configuration
-        int mapLayer = LayerMask.NameToLayer("Map");
-        if (mapLayer != -1)
-        {
-            bool containsMapLayer = (obstacleLayer.value & (1 << mapLayer)) != 0;
-            
-            if (!containsMapLayer)
-            {
-                Debug.LogError("A* pathfinder not configured to detect Map layer! Please set Obstacle Layer to include Map layer in Inspector");
-            }
-        }
-        else
-        {
-            Debug.LogError("Map layer does not exist! Please ensure Map layer is created");
-        }
-        
-        CreateGrid();
-    }
-    
-    void CreateGrid()
-    {
-        grid = new Node[gridWidth, gridHeight];
-        gridBottomLeft = transform.position - Vector3.right * gridWorldSize.x / 2 - Vector3.up * gridWorldSize.y / 2;
-        
-        int walkableCount = 0;
-        int unwalkableCount = 0;
-        
+
+        _gridWorldSize = new Vector2Int(gridWidth, gridHeight);
+        _grid = new Node[gridWidth, gridHeight];
+        _gridBottomLeft = new Vector3Int(-gridWidth / 2, -gridHeight / 2, 0);
+        Tilemap tilemapWall = GameObject.Find("Wall").GetComponent<Tilemap>();
+        Tilemap tilemapFurniture = GameObject.Find("Top").GetComponent<Tilemap>();
+
         for (int x = 0; x < gridWidth; x++)
         {
             for (int y = 0; y < gridHeight; y++)
             {
-                Vector3 worldPoint = gridBottomLeft + 
-                    Vector3.right * (x * nodeSize + nodeSize / 2) + 
-                    Vector3.up * (y * nodeSize + nodeSize / 2);
-                
-                bool walkable = IsPositionWalkable(worldPoint);
-                grid[x, y] = new Node(walkable, worldPoint, x, y);
-                
-                if (walkable) walkableCount++;
-                else unwalkableCount++;
+                Vector3Int cellPos = _gridBottomLeft + new Vector3Int(x, y, 0);
+                _grid[x, y] = new Node(!tilemapWall.GetTile(cellPos) && !tilemapFurniture.GetTile(cellPos), tilemapWall.CellToWorld(cellPos) + tilemapWall.cellSize / 2f, x, y);
             }
-        }
-        
-        Debug.Log($"A* grid created: Size={gridWidth}x{gridHeight}, Walkable={walkableCount}, Unwalkable={unwalkableCount}");
-        
-        if (unwalkableCount == 0)
-        {
-            Debug.LogError("Warning: No obstacles detected! Please check:\n" +
-                          "1. Obstacle Layer includes Map layer\n" +
-                          "2. Walls and furniture are on Map layer\n" +
-                          "3. Walls and furniture have Collider2D components\n" +
-                          "4. Node Size is appropriate");
         }
     }
     
     bool IsPositionWalkable(Vector3 worldPosition)
     {
-        // Method 1: Use LayerMask detection
-        float checkRadius = nodeSize / 2f;
-        Collider2D hit = Physics2D.OverlapCircle(worldPosition, checkRadius, obstacleLayer);
-        
-        // Method 2: Fallback detection
-        if (hit == null)
-        {
-            Collider2D[] allHits = Physics2D.OverlapCircleAll(worldPosition, checkRadius);
-            foreach (Collider2D collider in allHits)
-            {
-                if (collider.gameObject.layer == LayerMask.NameToLayer("Map"))
-                {
-                    hit = collider;
-                    break;
-                }
-            }
-        }
-        
-        return hit == null;
+        return Physics2D.OverlapBoxNonAlloc(worldPosition, Vector2.one* 0.99f, 0, Main.ColliderArray, Main.MaskStatic) == 0; 
     }
     
     public List<Vector3> FindPath(Vector3 startPos, Vector3 targetPos)
@@ -108,37 +51,23 @@ public class AStarPathfinder : MonoBehaviour
         Node targetNode = NodeFromWorldPoint(targetPos);
         
         if (startNode == null)
-        {
-            Debug.LogWarning($"Start node is null! Position: {startPos}");
             return null;
-        }
         
         if (targetNode == null)
-        {
-            Debug.LogWarning($"Target node is null! Position: {targetPos}");
             return null;
-        }
         
-        if (!startNode.walkable)
+        if (!startNode.Walkable)
         {
-            Debug.LogWarning($"Start position not walkable! Position: {startPos}");
             startNode = GetNearestWalkableNode(startNode);
             if (startNode == null)
-            {
-                Debug.LogWarning("No walkable area around start position");
                 return null;
-            }
         }
         
-        if (!targetNode.walkable)
+        if (!targetNode.Walkable)
         {
-            Debug.LogWarning($"Target position not walkable! Position: {targetPos}");
             targetNode = GetNearestWalkableNode(targetNode);
             if (targetNode == null)
-            {
-                Debug.LogWarning("No walkable area around target position");
                 return null;
-            }
         }
         
         List<Node> openSet = new List<Node>();
@@ -147,8 +76,8 @@ public class AStarPathfinder : MonoBehaviour
         
         ResetNodes();
         
-        startNode.gCost = 0;
-        startNode.hCost = GetDistance(startNode, targetNode);
+        startNode.GCost = 0;
+        startNode.HCost = GetDistance(startNode, targetNode);
         
         int maxIterations = gridWidth * gridHeight;
         int iterations = 0;
@@ -160,8 +89,8 @@ public class AStarPathfinder : MonoBehaviour
             Node currentNode = openSet[0];
             for (int i = 1; i < openSet.Count; i++)
             {
-                if (openSet[i].fCost < currentNode.fCost || 
-                   (openSet[i].fCost == currentNode.fCost && openSet[i].hCost < currentNode.hCost))
+                if (openSet[i].FCost < currentNode.FCost || 
+                   (openSet[i].FCost == currentNode.FCost && openSet[i].HCost < currentNode.HCost))
                 {
                     currentNode = openSet[i];
                 }
@@ -178,15 +107,15 @@ public class AStarPathfinder : MonoBehaviour
             
             foreach (Node neighbour in GetNeighbours(currentNode))
             {
-                if (!neighbour.walkable || closedSet.Contains(neighbour))
+                if (!neighbour.Walkable || closedSet.Contains(neighbour))
                     continue;
                 
-                int newMovementCostToNeighbour = currentNode.gCost + GetDistance(currentNode, neighbour);
-                if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour))
+                int newMovementCostToNeighbour = currentNode.GCost + GetDistance(currentNode, neighbour);
+                if (newMovementCostToNeighbour < neighbour.GCost || !openSet.Contains(neighbour))
                 {
-                    neighbour.gCost = newMovementCostToNeighbour;
-                    neighbour.hCost = GetDistance(neighbour, targetNode);
-                    neighbour.parent = currentNode;
+                    neighbour.GCost = newMovementCostToNeighbour;
+                    neighbour.HCost = GetDistance(neighbour, targetNode);
+                    neighbour.Parent = currentNode;
                     
                     if (!openSet.Contains(neighbour))
                         openSet.Add(neighbour);
@@ -200,6 +129,27 @@ public class AStarPathfinder : MonoBehaviour
         }
         
         return null;
+        
+        List<Node> GetNeighbours(Node node)
+        {
+            List<Node> neighbours = new List<Node>();
+        
+            int[] dx = { -1, 1, 0, 0 };
+            int[] dy = { 0, 0, -1, 1 };
+        
+            for (int i = 0; i < 4; i++)
+            {
+                int checkX = node.GridX + dx[i];
+                int checkY = node.GridY + dy[i];
+            
+                if (checkX >= 0 && checkX < gridWidth && checkY >= 0 && checkY < gridHeight)
+                {
+                    neighbours.Add(_grid[checkX, checkY]);
+                }
+            }
+        
+            return neighbours;
+        }
     }
     
     Node GetNearestWalkableNode(Node targetNode)
@@ -216,13 +166,13 @@ public class AStarPathfinder : MonoBehaviour
                 {
                     if (Mathf.Abs(x) + Mathf.Abs(y) > radius) continue;
                     
-                    int checkX = targetNode.gridX + x;
-                    int checkY = targetNode.gridY + y;
+                    int checkX = targetNode.GridX + x;
+                    int checkY = targetNode.GridY + y;
                     
                     if (checkX >= 0 && checkX < gridWidth && checkY >= 0 && checkY < gridHeight)
                     {
-                        Node node = grid[checkX, checkY];
-                        if (node.walkable)
+                        Node node = _grid[checkX, checkY];
+                        if (node.Walkable)
                         {
                             walkableNodes.Add(node);
                         }
@@ -259,9 +209,9 @@ public class AStarPathfinder : MonoBehaviour
         {
             for (int y = 0; y < gridHeight; y++)
             {
-                grid[x, y].gCost = int.MaxValue;
-                grid[x, y].hCost = 0;
-                grid[x, y].parent = null;
+                _grid[x, y].GCost = int.MaxValue;
+                _grid[x, y].HCost = 0;
+                _grid[x, y].Parent = null;
             }
         }
     }
@@ -273,8 +223,8 @@ public class AStarPathfinder : MonoBehaviour
         
         while (currentNode != startNode)
         {
-            path.Add(currentNode.worldPosition);
-            currentNode = currentNode.parent;
+            path.Add(currentNode.WorldPosition);
+            currentNode = currentNode.Parent;
         }
         path.Reverse();
         
@@ -306,94 +256,74 @@ public class AStarPathfinder : MonoBehaviour
         simplifiedPath.Add(path[path.Count - 1]);
         return simplifiedPath;
     }
-    
-    List<Node> GetNeighbours(Node node)
-    {
-        List<Node> neighbours = new List<Node>();
-        
-        int[] dx = { -1, 1, 0, 0 };
-        int[] dy = { 0, 0, -1, 1 };
-        
-        for (int i = 0; i < 4; i++)
-        {
-            int checkX = node.gridX + dx[i];
-            int checkY = node.gridY + dy[i];
-            
-            if (checkX >= 0 && checkX < gridWidth && checkY >= 0 && checkY < gridHeight)
-            {
-                neighbours.Add(grid[checkX, checkY]);
-            }
-        }
-        
-        return neighbours;
-    }
+     
     
     Node NodeFromWorldPoint(Vector3 worldPosition)
     {
-        Vector3 localPos = worldPosition - gridBottomLeft;
-        int x = Mathf.FloorToInt(localPos.x / nodeSize);
-        int y = Mathf.FloorToInt(localPos.y / nodeSize);
+        Vector3 localPos = worldPosition - _gridBottomLeft;
+        int x = Mathf.FloorToInt(localPos.x);
+        int y = Mathf.FloorToInt(localPos.y);
         
         if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
-            return grid[x, y];
+            return _grid[x, y];
         
         return null;
     }
     
     int GetDistance(Node nodeA, Node nodeB)
     {
-        int dstX = Mathf.Abs(nodeA.gridX - nodeB.gridX);
-        int dstY = Mathf.Abs(nodeA.gridY - nodeB.gridY);
+        int dstX = Mathf.Abs(nodeA.GridX - nodeB.GridX);
+        int dstY = Mathf.Abs(nodeA.GridY - nodeB.GridY);
         
         return 10 * (dstX + dstY);
     }
     
     void OnDrawGizmos()
     {
-        if (grid != null)
+        if (_grid != null)
         {
-            foreach (Node n in grid)
+            foreach (Node n in _grid)
             {
-                if (n.walkable)
+                if (n.Walkable)
                 {
                     Gizmos.color = new Color(0, 1, 0, 0.1f);
                 }
                 else
                 {
                     Gizmos.color = new Color(1, 0, 0, 0.5f);
-                    Gizmos.DrawCube(n.worldPosition, Vector3.one * nodeSize);
+                    Gizmos.DrawCube(n.WorldPosition, Vector3.one);
                 }
                 
-                Gizmos.DrawWireCube(n.worldPosition, Vector3.one * (nodeSize - 0.1f));
+                Gizmos.DrawWireCube(n.WorldPosition, Vector3.one * 0.1f);
             }
         }
         
         // Draw grid boundaries
         Gizmos.color = Color.blue;
         Vector3 center = transform.position;
-        Vector3 size = new Vector3(gridWorldSize.x, gridWorldSize.y, 0.1f);
+        Vector3 size = new Vector3(_gridWorldSize.x, _gridWorldSize.y, 0.1f);
         Gizmos.DrawWireCube(center, size);
     }
 }
 
 public class Node
 {
-    public bool walkable;
-    public Vector3 worldPosition;
-    public int gridX;
-    public int gridY;
+    public readonly bool Walkable;
+    public Vector3 WorldPosition;
+    public readonly int GridX;
+    public readonly int GridY;
     
-    public int gCost;
-    public int hCost;
-    public Node parent;
+    public int GCost;
+    public int HCost;
+    public Node Parent;
     
-    public int fCost { get { return gCost + hCost; } }
+    public int FCost { get { return GCost + HCost; } }
     
-    public Node(bool _walkable, Vector3 _worldPos, int _gridX, int _gridY)
+    public Node(bool walkable, Vector3 worldPos, int _gridX, int _gridY)
     {
-        walkable = _walkable;
-        worldPosition = _worldPos;
-        gridX = _gridX;
-        gridY = _gridY;
+        Walkable = walkable;
+        WorldPosition = worldPos;
+        GridX = _gridX;
+        GridY = _gridY;
     }
 }
