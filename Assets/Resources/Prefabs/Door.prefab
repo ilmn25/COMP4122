@@ -92,7 +92,7 @@ GameObject:
   - component: {fileID: 2786353650020814387}
   m_Layer: 8
   m_Name: Door
-  m_TagString: Untagged
+  m_TagString: Door
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -177,7 +177,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1010436405
+  GlobalObjectIdHash: 745604426
   InScenePlacedSourceGlobalObjectIdHash: 1817261986
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -222,7 +222,7 @@ BoxCollider2D:
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.125, y: 1.9375}
+    oldSize: {x: 1, y: 1.9375}
     newSize: {x: 16, y: 16}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -243,4 +243,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52ccda14589741ea968250c8e0d80c99, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  doorType: 0
   isFaceFront: 1
+  doorPassword: 1234
