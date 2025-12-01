@@ -14485,6 +14485,100 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 531443370}
   m_CullTransparentMesh: 1
+--- !u!1 &532361709
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 532361712}
+  - component: {fileID: 532361711}
+  - component: {fileID: 532361710}
+  m_Layer: 0
+  m_Name: DarkRoom(2)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &532361710
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 532361709}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9364c6d212744cd881f6420601722aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  generators:
+  - {fileID: 1575545463}
+  - {fileID: 1493224949}
+  - {fileID: 48178639}
+--- !u!61 &532361711
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 532361709}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 11, y: 10.18}
+  m_EdgeRadius: 0
+--- !u!4 &532361712
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 532361709}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -36, y: -0.59, z: -1000}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &546370709
 GameObject:
   m_ObjectHideFlags: 0
@@ -21907,7 +22001,8 @@ MonoBehaviour:
 
     Police are investigating multiple missing persons reports
 
-    last linked to the Chungking Mansion.
+    last
+    linked to the Chungking Mansion.
 
     ...'
   - '...
@@ -25943,96 +26038,6 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 29c6cbb1ef8a2854188858319c6473de, type: 3}
---- !u!1 &1676710838
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1676710840}
-  - component: {fileID: 1676710839}
-  - component: {fileID: 1676710841}
-  m_Layer: 0
-  m_Name: DarkRoom
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!61 &1676710839
-BoxCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1676710838}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: -7.558302, y: 0.34215736}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0, y: 0}
-    oldSize: {x: 0, y: 0}
-    newSize: {x: 0, y: 0}
-    adaptiveTilingThreshold: 0
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
-  serializedVersion: 2
-  m_Size: {x: 39.4966, y: 12.143372}
-  m_EdgeRadius: 0
---- !u!4 &1676710840
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1676710838}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -21.72, y: -25.44, z: -1000}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1676710841
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1676710838}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c9364c6d212744cd881f6420601722aa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1001 &1686024366
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -128786,6 +128791,8 @@ MonoBehaviour:
   clocks:
   - {fileID: 968689229}
   - {fileID: 2002907690}
+  wiringPrefab: {fileID: 0}
+  wiringPosition: {x: 0, y: 0, z: 0}
 --- !u!1001 &1906636166
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -129124,8 +129131,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1097053631363519682, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
       propertyPath: clueText
-      value: Day 3 of cowering in this tomb. I don't know when the blade of fate will
-        finally fall.
+      value: Day 3 of cowering in this tomb. I don't know when the blade of fate
+        will finally fall.
       objectReference: {fileID: 0}
     - target: {fileID: 1097053631363519682, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
       propertyPath: clueText.Array.size
@@ -129133,8 +129140,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1097053631363519682, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
       propertyPath: clueText.Array.data[0]
-      value: Day 3 of cowering in this tomb. I don't know when the blade of fate will
-        finally fall.
+      value: Day 3 of cowering in this tomb. I don't know when the blade of fate
+        will finally fall.
       objectReference: {fileID: 0}
     - target: {fileID: 6003007577649529488, guid: 24658f63befdf6b45b59f71ca222c611, type: 3}
       propertyPath: GlobalObjectIdHash
@@ -130991,6 +130998,97 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls: []
+--- !u!1 &2069284325
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2069284328}
+  - component: {fileID: 2069284327}
+  - component: {fileID: 2069284326}
+  m_Layer: 0
+  m_Name: DarkRoom(1)
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2069284326
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2069284325}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c9364c6d212744cd881f6420601722aa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  generators: []
+--- !u!61 &2069284327
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2069284325}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 0
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: -7.558302, y: 0.34215736}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 39.4966, y: 12.143372}
+  m_EdgeRadius: 0
+--- !u!4 &2069284328
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2069284325}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -21.72, y: -25.44, z: -1000}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2084022587
 GameObject:
   m_ObjectHideFlags: 0
@@ -131991,8 +132089,8 @@ SceneRoots:
   - {fileID: 2002907689}
   - {fileID: 1904350120}
   - {fileID: 1626947767}
-  - {fileID: 1692937197}
   - {fileID: 2053995742}
+  - {fileID: 1692937197}
   - {fileID: 125846911}
   - {fileID: 5083555286023773427}
   - {fileID: 960584023}
@@ -132022,7 +132120,8 @@ SceneRoots:
   - {fileID: 395069752}
   - {fileID: 1289656498}
   - {fileID: 1863885932}
-  - {fileID: 1676710840}
+  - {fileID: 2069284328}
+  - {fileID: 532361712}
   - {fileID: 6079240253055081209}
   - {fileID: 1261961289}
   - {fileID: 1250485071}
