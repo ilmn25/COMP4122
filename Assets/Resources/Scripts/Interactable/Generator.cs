@@ -18,24 +18,15 @@ namespace Resources.Scripts
         
         // synced state
         public readonly NetworkVariable<bool> IsActivated = new NetworkVariable<bool>();
-        private readonly NetworkVariable<float> _currentProgress = new NetworkVariable<float>();
         private readonly NetworkVariable<ulong> _interactingPlayerId = new NetworkVariable<ulong>(ulong.MaxValue);
         
         // local state
+        private float _currentProgress = 0f;
         private Coroutine _activationCoroutine;
             
         private void Start()
-        {
-            Debug.Log("Generator Start called!");
-            
-            // 初始化UI引用
-            if (generatorCanvas == null)
-                generatorCanvas = GetComponentInChildren<Canvas>();
-            
-            if (progressTextUI == null && generatorCanvas != null)
-                progressTextUI = generatorCanvas.GetComponentInChildren<TextMeshProUGUI>();
-            
-            // set UI
+        {   
+            // set ui
             if (generatorCanvas != null)
             {
                 generatorCanvas.renderMode = RenderMode.WorldSpace;
@@ -43,88 +34,47 @@ namespace Resources.Scripts
                 {
                     generatorCanvas.worldCamera = Camera.main;
                 }
-                Debug.Log("UI Canvas setup complete!");
-            }
-            else
-            {
-                Debug.LogError("Canvas not found on Generator!");
             }
             
             // listen to network variable changes
-            IsActivated.OnValueChanged += OnActivationStateChanged;
-            _currentProgress.OnValueChanged += OnProgressChanged;
+            IsActivated.OnValueChanged += (oldValue, newValue) => UpdateDisplay();
             _interactingPlayerId.OnValueChanged += OnInteractingPlayerChanged;
             
             UpdateDisplay();
         }
-        
-        private void LateUpdate()
-        {
-            if (generatorCanvas != null && Camera.main != null)
-            {
-                // Billboarding
-                generatorCanvas.transform.LookAt(
-                    generatorCanvas.transform.position + Camera.main.transform.forward,
-                    Vector3.up
-                );
-            }
-        }
 
         public override void Interact(Character character)
         {
-            
-            if (IsActivated.Value)
+            if (IsActivated.Value) return; // already activated
+
+            // being activated
+            if (_interactingPlayerId.Value != ulong.MaxValue && _interactingPlayerId.Value != NetworkManager.Singleton.LocalClientId)
             {
-                Debug.Log("Generator already activated, showing message");
-                ShowAlreadyActivatedMessage();
+                StartCoroutine(ShowTemporaryMessage("OCCUPIED BY PLAYER", Color.yellow, 2f));
                 return;
             }
-            
-            if (_interactingPlayerId.Value != ulong.MaxValue && 
-                _interactingPlayerId.Value != NetworkManager.Singleton.LocalClientId)
-            {
-                Debug.Log("Generator occupied by other player");
-                ShowOccupiedMessage();
-                return;
-            }
-            
-            Debug.Log("Requesting activation from server");
+
             RequestActivationServerRpc(NetworkManager.Singleton.LocalClientId);
         }
             
         [ServerRpc(RequireOwnership = false)]
         private void RequestActivationServerRpc(ulong clientId)
-        {
-            Debug.Log($"Server received activation request from client {clientId}");
-            
-            if (IsActivated.Value) 
-            {
-                Debug.Log("Server: Generator already activated, rejecting request");
-                return;
-            }
-            
-            if (_interactingPlayerId.Value != ulong.MaxValue && _interactingPlayerId.Value != clientId) 
-            {
-                Debug.Log($"Server: Generator occupied by {_interactingPlayerId.Value}, rejecting request from {clientId}");
-                return;
-            }
-            
-            Debug.Log($"Server: Setting interacting player to {clientId}");
+        {            
+            if (IsActivated.Value) return; // already activated
+            if (_interactingPlayerId.Value != ulong.MaxValue && _interactingPlayerId.Value != clientId) return; // double check
+        
             _interactingPlayerId.Value = clientId;
         }
                 
         private void OnInteractingPlayerChanged(ulong oldPlayerId, ulong newPlayerId)
         {
-            Debug.Log($"Interacting player changed from {oldPlayerId} to {newPlayerId}");
             
-            if (newPlayerId == NetworkManager.Singleton.LocalClientId && !IsActivated.Value)
-            {
-                Debug.Log("Local player is now interacting, starting activation");
-                StartLocalActivation();
-            }
+            if (newPlayerId == NetworkManager.Singleton.LocalClientId && !IsActivated.Value) {
+                if(_activationCoroutine == null) _activationCoroutine = StartCoroutine(ActivationProgress());
+            } 
+            
             else if (newPlayerId == ulong.MaxValue && _activationCoroutine != null)
             {
-                Debug.Log("Interacting player cleared, stopping activation");
                 StopCoroutine(_activationCoroutine);
                 _activationCoroutine = null;
                 if (!IsActivated.Value)
@@ -134,27 +84,20 @@ namespace Resources.Scripts
             }
         }
         
-        private void StartLocalActivation()
-        {
-            if (_activationCoroutine != null) return;
-            
-            _activationCoroutine = StartCoroutine(ActivationProgress());
-        }
-        
         private IEnumerator ActivationProgress()
         {
             Audio.PlaySfx(AudioClipID.Item);
-            float localProgress = _currentProgress.Value;
+            _currentProgress = 0f;
             float progressIncrement = checkInterval / activationTime * 100f;
             
-            while (localProgress < 100f)
+            while (_currentProgress < 100f)
             {
                 yield return new WaitForSeconds(checkInterval);
                 
                 if (Vector3.Distance(Main.TargetPlayer.transform.position, transform.position) <= interactionRange)
                 {
-                    localProgress += progressIncrement;
-                    UpdateProgressServerRpc(Mathf.RoundToInt(localProgress));
+                    _currentProgress += progressIncrement;
+                    UpdateDisplay();
                 }
                 else
                 {
@@ -166,78 +109,32 @@ namespace Resources.Scripts
             CompleteActivationServerRpc();
         }
          
-        
-        [ServerRpc]
-        private void UpdateProgressServerRpc(int progress)
-        {
-            _currentProgress.Value = progress;
-        }
-        
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         private void CancelActivationServerRpc()
         {
             _interactingPlayerId.Value = ulong.MaxValue;
-            _currentProgress.Value = 0f;
+            _currentProgress = 0f;
         }
         
-        [ServerRpc]
+        [ServerRpc(RequireOwnership = false)]
         private void CompleteActivationServerRpc()
         {
             IsActivated.Value = true;
-            _currentProgress.Value = 100f;
+            _currentProgress = 100f;
             _interactingPlayerId.Value = ulong.MaxValue;
         }
-        
-        private void ShowAlreadyActivatedMessage()
-        {
-            StartCoroutine(ShowTemporaryMessage("ALREADY ACTIVATED", Color.red, 2f));
-        }
-        
-        private void ShowOccupiedMessage()
-        {
-            StartCoroutine(ShowTemporaryMessage("OCCUPIED BY PLAYER", Color.yellow, 2f));
-        }
-        
+    
         private IEnumerator ShowTemporaryMessage(string message, Color color, float duration)
         {
-            SetTextDisplay(message, color);
+            progressTextUI.text = message;
+            progressTextUI.color = color;
             yield return new WaitForSeconds(duration);
             UpdateDisplay();
-        }
-        
-        // UI display 
-        private void SetTextDisplay(string text, Color color)
-        { 
-            progressTextUI.text = text;
-            progressTextUI.color = color;
         }
         
         private void OnActivationStateChanged(bool oldValue, bool newValue)
         {
             UpdateDisplay();
-        }
-        
-        private void OnProgressChanged(float oldValue, float newValue)
-        {
-            if (_interactingPlayerId.Value == NetworkManager.Singleton.LocalClientId && !IsActivated.Value)
-            {
-                UpdateProgressDisplay(Mathf.RoundToInt(newValue));
-            }
-        }
-        
-        private void UpdateProgressDisplay(int newValue)
-        {
-            if (!IsActivated.Value)
-            {
-                // change color based on progress
-                Color progressColor;
-                if (newValue < 33) progressColor = Color.red;
-                else if (newValue < 66) progressColor = Color.yellow;
-                else progressColor = Color.green;
-                
-                progressTextUI.text = newValue + "%";
-                progressTextUI.color = progressColor;
-            }
         }
         
         private void UpdateDisplay()
@@ -249,18 +146,19 @@ namespace Resources.Scripts
             }
             else if (_interactingPlayerId.Value == NetworkManager.Singleton.LocalClientId)
             {
-                UpdateProgressDisplay(Mathf.RoundToInt(_currentProgress.Value));
+                int progress = Mathf.RoundToInt(_currentProgress);
+                Color progressColor;
+                if (progress < 33) progressColor = Color.red;
+                else if (progress < 66) progressColor = Color.yellow;
+                else progressColor = Color.green;
+
+                progressTextUI.text = progress + "%";
+                progressTextUI.color = progressColor;
             }
             else
             {
                 progressTextUI.text = "";
             }
-        }
-          
-        public override void OnNetworkSpawn()
-        {
-            base.OnNetworkSpawn();
-            UpdateDisplay();
         }
     }
 }
