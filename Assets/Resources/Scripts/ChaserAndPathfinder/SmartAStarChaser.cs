@@ -29,7 +29,6 @@ public class SmartAStarChaser : NetworkBehaviour
     public float idleTime = 2f;
     public float patrolRecalculateInterval = 2f;
     
-    private List<Transform> players = new List<Transform>();
     private Transform currentTarget;
     private List<Vector3> currentPath;
     private int currentPathIndex;
@@ -69,19 +68,8 @@ public class SmartAStarChaser : NetworkBehaviour
         currentState = ChaserState.Patrolling;
         
         // Set initial patrol target
-        SetRandomPatrolTarget();
-         
-        // Ensure players are initialized
-        Invoke(nameof(InitializeChaser), 1f);
-    }
-      
-    
-    void InitializeChaser()
-    {
-        FindAllPlayers();
-        Debug.Log($"SmartAStarChaser initialized, found {players.Count} players");
-        Debug.Log($"Chaser initial position: {transform.position}, state: {currentState}");
-    }
+        SetRandomPatrolTarget(); 
+    } 
     
     void Update()
     {   
@@ -130,8 +118,6 @@ public class SmartAStarChaser : NetworkBehaviour
     
     void RecalculatePatrolPath()
     {
-        if (AStarPathfinder.Instance == null) return;
-        
         currentPath = AStarPathfinder.Instance.FindPath(transform.position, currentPatrolTarget);
         currentPathIndex = 0;
         lastPatrolPathRecalculationTime = Time.time;
@@ -188,20 +174,13 @@ public class SmartAStarChaser : NetworkBehaviour
     void UpdateChasing()
     {
         // Check if target is lost
-        if (currentTarget == null || !IsTargetInRange(currentTarget))
+        if (!currentTarget || !IsTargetInRange(currentTarget))
         {
             currentState = ChaserState.Returning;
             currentTarget = null;
             currentPath = new List<Vector3>();
             return;
-        }
-        
-        // Original chasing logic
-        if (players.Count == 0 || currentTarget == null)
-        {
-            FindAllPlayers();
-            if (players.Count == 0) return;
-        }
+        } 
         
         seesPlayer = CheckPlayerVision();
         
@@ -266,20 +245,15 @@ public class SmartAStarChaser : NetworkBehaviour
     }
     
     void CheckForPlayersInSight()
-    {
-        if (players.Count == 0) 
-        {
-            FindAllPlayers();
-            if (players.Count == 0) return;
-        }
+    { 
         
         // Check all players if they are in vision range
-        foreach (Transform player in players)
+        foreach (Character player in Main.Players)
         {
-            if (player != null && IsTargetInSightRange(player) && CheckSinglePlayerVision(player))
+            if (IsTargetInSightRange(player.transform) && CheckSinglePlayerVision(player.transform))
             {
                 // Found player, start chasing
-                currentTarget = player;
+                currentTarget = player.transform;
                 currentState = ChaserState.Chasing;
                 return;
             }
@@ -287,17 +261,13 @@ public class SmartAStarChaser : NetworkBehaviour
     }
     
     bool IsTargetInRange(Transform target)
-    {
-        if (target == null) return false;
-        
+    {  
         float distance = Vector2.Distance(transform.position, target.position);
         return distance <= loseSightRange;
     }
     
     bool IsTargetInSightRange(Transform target)
-    {
-        if (target == null) return false;
-        
+    { 
         float distance = Vector2.Distance(transform.position, target.position);
         return distance <= visionRange;
     }
@@ -317,7 +287,7 @@ public class SmartAStarChaser : NetworkBehaviour
             float distance = direction.magnitude;
             RaycastHit2D hit = Physics2D.Raycast(transform.position, direction.normalized, distance, wallLayer);
             
-            if (hit.collider == null)
+            if (!hit.collider)
             {
                 currentPatrolTarget = potentialTarget;
                 return;
@@ -331,9 +301,7 @@ public class SmartAStarChaser : NetworkBehaviour
     }
     
     bool CheckSinglePlayerVision(Transform player)
-    {
-        if (player == null) return false;
-        
+    { 
         Vector2 toPlayer = player.position - transform.position;
         float distance = toPlayer.magnitude;
         
@@ -352,36 +320,9 @@ public class SmartAStarChaser : NetworkBehaviour
         if (angle > visionAngle / 2) return false;
         
         RaycastHit2D hit2 = Physics2D.Raycast(transform.position, toPlayer.normalized, distance, wallLayer);
-        return (hit2.collider == null);
+        return (!hit2.collider);
     }
-    
-    void FindAllPlayers()
-    {
-        players.Clear();
-        
-        if (NetworkManager.Singleton != null && IsServer)
-        {
-            foreach (var client in NetworkManager.Singleton.ConnectedClientsList)
-            {
-                if (client.PlayerObject != null && client.PlayerObject.CompareTag("Player"))
-                {
-                    players.Add(client.PlayerObject.transform);
-                }
-            }
-        }
-        
-        if (players.Count == 0)
-        {
-            GameObject[] playerObjects = GameObject.FindGameObjectsWithTag("Player");
-            foreach (GameObject playerObj in playerObjects)
-            {
-                if (playerObj != null)
-                {
-                    players.Add(playerObj.transform);
-                }
-            }
-        }
-    }
+     
 
     void RecalculatePath()
     {
@@ -405,7 +346,7 @@ public class SmartAStarChaser : NetworkBehaviour
     
     Vector3 GetStrategicPosition()
     {
-        if (currentTarget == null) return transform.position;
+        if (!currentTarget) return transform.position;
         return currentTarget.position;
     }
     
@@ -417,7 +358,7 @@ public class SmartAStarChaser : NetworkBehaviour
             if (seesPlayer && currentTarget != null)
             {
                 Vector2 moveDirection = (currentTarget.position - transform.position).normalized;
-                transform.position += (Vector3)moveDirection * (seesPlayer ? chaseSpeed : moveSpeed) * Time.deltaTime;
+                transform.position += (Vector3)moveDirection * ((seesPlayer ? chaseSpeed : moveSpeed) * Time.deltaTime);
             }
             else
             {
@@ -483,12 +424,12 @@ public class SmartAStarChaser : NetworkBehaviour
     }
 
     void CheckCatchPlayer(){
-        if(currentTarget == null) return;
+        if(!currentTarget) return;
 
         float distanceToPlayer = Vector2.Distance(transform.position, currentTarget.position);
         if(distanceToPlayer <= catchDistance && Time.time >= nextCatchTime){
             var obj = currentTarget.GetComponent<NetworkObject>();
-            if (obj != null) CatchPlayerClientRpc(obj.OwnerClientId); // notify the caught player and minus health
+            if (obj) CatchPlayerClientRpc(obj.OwnerClientId); // notify the caught player and minus health
             nextCatchTime = Time.time + catchCooldown;
         }
     }

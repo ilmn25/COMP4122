@@ -17784,8 +17784,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   obstacleLayer:
     serializedVersion: 2
-    m_Bits: 0
-  nodeSize: 1
+    m_Bits: 64
   gridWidth: 130
   gridHeight: 102
 --- !u!114 &922969880
@@ -54429,7 +54428,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 1
   m_Sprite: {fileID: 21300000, guid: 93815b10327b99741a2e4e04cbead74c, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -132103,10 +132102,10 @@ SceneRoots:
   m_Roots:
   - {fileID: 942681786}
   - {fileID: 2084022590}
-  - {fileID: 858404176}
   - {fileID: 922969878}
   - {fileID: 1447887321}
   - {fileID: 1514943608}
+  - {fileID: 858404176}
   - {fileID: 1487490814}
   - {fileID: 4691033326855463643}
   - {fileID: 1482177619}
