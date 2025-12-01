@@ -16,7 +16,6 @@ namespace Resources.Scripts
 {
     public partial class UI : MonoBehaviour
     {
-        public static UI Inst;
         private const int MinPlayers = 1;
         
         public GameObject uiMainMenuObject;
@@ -32,13 +31,12 @@ namespace Resources.Scripts
         public GameObject uiJoinObject;
         public TMP_InputField uiInputField;
         public Button uiEnterButton;
-
+        
         public GameObject uiPhoneObject;
         public TextMeshProUGUI uiPhoneInput;
         
         public void Start()
         {
-            Inst = this;
             uiHostButton.onClick.AddListener(OnHostButtonClicked);
             uiJoinButton.onClick.AddListener(OnJoinButtonClicked);
             uiQuitButton.onClick.AddListener(OnQuitButtonClicked);
@@ -62,7 +60,6 @@ namespace Resources.Scripts
     public partial class UI
     { 
         private static bool _busy; 
-        public static event Action OnBegin; // event for starting the game 
  
         private void OnClientConnected(ulong clientId)
         {
@@ -76,6 +73,11 @@ namespace Resources.Scripts
                 StartCoroutine(Slide(true, 0.2f, uiMainMenuObject, Vector3.zero)); 
             }
             UpdateBeginButtonState();
+            if (NetworkManager.Singleton.IsServer &&
+                NetworkManager.Singleton.ConnectedClients.TryGetValue(clientId, out var client))
+            {
+                Main.Players.Add( client.PlayerObject.GetComponent<Character>());
+            }
         }
         
         private void OnClientDisconnected(ulong clientId)
@@ -90,6 +92,9 @@ namespace Resources.Scripts
                 Environment.SetEnvironment(EnvPreset.Night);  
             }
             UpdateBeginButtonState();
+            
+            if (NetworkManager.Singleton.IsServer)
+                Main.Players.RemoveAll(c => c.OwnerClientId == clientId);
         }
 
         private void OnHostButtonClicked()
@@ -140,7 +145,7 @@ namespace Resources.Scripts
         private void OnBeginButtonClicked()
         { 
             uiBeginButton.interactable = false;
-            OnBegin?.Invoke();
+            Main.Begun = true;
             uiHostObject.SetActive(false);
             Cutscene.Scene.Value = 1;
         }

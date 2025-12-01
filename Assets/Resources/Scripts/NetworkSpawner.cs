@@ -22,12 +22,9 @@ public class NetworkSpawner : NetworkBehaviour
     public int overlapBufferSize = 16; // increased pickable distance 
 
     public int maxAttempts = 20;
- 
-    // Listen for start game event from UI
-    void OnEnable() => UI.OnBegin += SpawnAll;
-    void OnDisable() => UI.OnBegin -= SpawnAll;
+  
 
-    void SpawnAll(){
+    void Start(){
 
         if (!IsServer) return;
 

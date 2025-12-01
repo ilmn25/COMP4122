@@ -9,7 +9,7 @@ namespace Resources.Scripts
 {
     public class Cutscene : NetworkBehaviour
     {
-        [NonSerialized] public static readonly NetworkVariable<int> Scene = new();
+        [NonSerialized] public static readonly NetworkVariable<int> Scene = new(0);
         private readonly NetworkVariable<int> _waiting = new ();
 
         [ServerRpc (RequireOwnership = false)]
@@ -19,11 +19,59 @@ namespace Resources.Scripts
         {
             Scene.OnValueChanged += (value, newValue) =>
             {
-                if (newValue == 1) StartCoroutine(Opening());
-                if (newValue == 2) StartCoroutine(EndingEscaped());
+                if (newValue == 1) StartCoroutine(Opening()); 
+                else if (newValue == 2) {
+                    Debug.Log("a");
+                    StartCoroutine(Ending(new DialogueData
+                    {
+                        Text = "I am dead",
+                        Next = new Dictionary<string, DialogueData>
+                        {
+                            {
+                                "", new DialogueData
+                                {
+                                    Text = "we are all dead",
+                                    Next = new Dictionary<string, DialogueData>
+                                    {
+                                        { "", new DialogueData { Text = "the end." } }
+                                    }
+                                }
+                            }
+                        }
+                    }));
+                    
+                }
+                else if (newValue == 3) StartCoroutine(Ending(new DialogueData
+                {
+                    Text = "30th December, 2027",
+                    Next = new Dictionary<string, DialogueData>
+                    {
+                        {
+                            "", new DialogueData
+                            {
+                                Text = "everyone escape blahwdaowhda",
+                                Next = new Dictionary<string, DialogueData>
+                                {
+                                    { "", new DialogueData { Text = "the end." } }
+                                }
+                            }
+                        }
+                    }
+                })); 
             };
         }
- 
+
+        private void Update()
+        {
+            if (!IsServer || !Main.Begun || Scene.Value != 0) return;
+            int alive = 0;
+            foreach (Character character in Main.Players)
+            {
+                if (character.CurrentHealth.Value > 0) alive++;
+            }
+            if (alive == 0) Scene.Value = 2;
+        }
+
         private IEnumerator Opening()
         {
             Environment.SetEnvironment(EnvPreset.BlackScreen);
@@ -63,41 +111,26 @@ namespace Resources.Scripts
                 HUD.Inst.gameObject.SetActive(true);
                 yield return new WaitForSeconds(3); 
             }
-        }
+        } 
         
-        
-        private IEnumerator EndingEscaped()
+        private IEnumerator Ending(DialogueData dialogueData)
         {
+            yield return new WaitForSeconds(2);
             Environment.SetEnvironment(EnvPreset.BlackScreen);
             yield return new WaitForSeconds(3);
             Main.CanMove = false;
             yield return new WaitForSeconds(1);
-            Dialogue.Run(new DialogueData
-            {
-                Text = "30th December, 2027",
-                Next = new Dictionary<string, DialogueData>
-                {
-                    { "", new DialogueData {
-                            Text = "everyone escape blahwdaowhda", 
-                            Next = new Dictionary<string, DialogueData>
-                            {
-                                { "", new DialogueData { Text = "the end." }}
-                            }
-                        } 
-                    }
-                }
-            }, () => _ = new CoroutineTask(OnDialogueEnd()));
+            Dialogue.Run(dialogueData, () => _ = new CoroutineTask(OnDialogueEnd()));
             IEnumerator OnDialogueEnd()
             {
                 AddWaitingServerRpc();
-                while (Scene.Value != 0)
+                while (Scene.Value != -1)
                 {
                     // if (NetworkManager.Singleton.IsHost) Debug.Log(_waiting.Value + " | " + NetworkManager.Singleton.ConnectedClients.Count);
-                    if (NetworkManager.Singleton.IsHost && _waiting.Value >= NetworkManager.Singleton.ConnectedClients.Count) Scene.Value = 0; 
+                    if (NetworkManager.Singleton.IsHost && _waiting.Value >= NetworkManager.Singleton.ConnectedClients.Count) Scene.Value  = -1; 
                     yield return null;
                 } 
-                if (NetworkManager.Singleton.IsHost) NetworkManager.Singleton.Shutdown();
-                yield return new WaitForSeconds(3); 
+                Application.Quit();
             }
         }
     }

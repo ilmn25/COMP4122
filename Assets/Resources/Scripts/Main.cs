@@ -11,10 +11,12 @@ namespace Resources.Scripts
 { 
     
     public class Main : MonoBehaviour
-    {
+    { 
+        public static bool Begun = false;
         public static readonly Collider2D[] ColliderArray = new Collider2D[20];
         public static Main Instance; 
         public static Character TargetPlayer;
+        public static readonly List<Character> Players =  new ();
         public static GameObject ViewportObject;
         public static GameObject MainCameraObject;
 

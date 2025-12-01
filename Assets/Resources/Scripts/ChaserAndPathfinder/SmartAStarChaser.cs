@@ -71,75 +71,11 @@ public class SmartAStarChaser : NetworkBehaviour
         
         // Set initial patrol target
         SetRandomPatrolTarget();
-        
-        // Initialize UI references
-        InitializeUI();
-        
+         
         // Ensure players are initialized
         Invoke(nameof(InitializeChaser), 1f);
     }
-    
-    void InitializeUI()
-    {
-        // 查找UI GameObject
-        GameObject uiObject = GameObject.Find("UI");
-        if (uiObject != null)
-        {
-            Debug.Log("Found UI object");
-            
-            // 查找Lose UI
-            loseUI = uiObject.transform.Find("Lose")?.gameObject;
-            if (loseUI != null)
-            {
-                Debug.Log("Found Lose UI");
-                
-                // 初始化Lose UI组件
-                Transform textTMP = loseUI.transform.Find("Text (TMP)");
-                if (textTMP != null)
-                {
-                    deadText = textTMP.GetComponent<TextMeshProUGUI>();
-                }
-                
-                Transform menuBtn = loseUI.transform.Find("MenuButton");
-                if (menuBtn != null)
-                {
-                    menuButton = menuBtn.GetComponent<UnityEngine.UI.Button>();
-                    menuButton.onClick.RemoveAllListeners();
-                    menuButton.onClick.AddListener(ReturnToMainMenu);
-                }
-                
-                Transform quitBtn = loseUI.transform.Find("QuitButton");
-                if (quitBtn != null)
-                {
-                    quitButton = quitBtn.GetComponent<UnityEngine.UI.Button>();
-                    quitButton.onClick.RemoveAllListeners();
-                    quitButton.onClick.AddListener(QuitGame);
-                }
-                
-                loseUI.SetActive(false);
-            }
-            else
-            {
-                Debug.LogWarning("Lose UI not found");
-            }
-            
-            // 查找MainMenu UI
-            mainMenuUI = uiObject.transform.Find("MainMenu")?.gameObject;
-            if (mainMenuUI != null)
-            {
-                Debug.Log("Found MainMenu UI");
-                mainMenuUI.SetActive(false);
-            }
-            else
-            {
-                Debug.LogWarning("MainMenu UI not found");
-            }
-        }
-        else
-        {
-            Debug.LogError("UI object not found in scene!");
-        }
-    }
+      
     
     void InitializeChaser()
     {
@@ -149,15 +85,7 @@ public class SmartAStarChaser : NetworkBehaviour
     }
     
     void Update()
-    {
-        // 如果MainMenu UI显示中，停止所有AI逻辑
-        if (mainMenuUI != null && mainMenuUI.activeInHierarchy)
-        {
-            return;
-        }
-        
-        if (!IsServer || gameOver) return;
-        
+    {   
         // State machine
         switch (currentState)
         {
@@ -170,13 +98,7 @@ public class SmartAStarChaser : NetworkBehaviour
             case ChaserState.Returning:
                 UpdateReturning();
                 break;
-        }
-        
-        // Debug info every 60 frames
-        if (Time.frameCount % 60 == 0)
-        {
-            Debug.Log($"Chaser state: {currentState}, position: {transform.position}, target: {currentTarget?.name ?? "none"}");
-        }
+        } 
     }
     
     void UpdatePatrolling()
@@ -574,7 +496,7 @@ public class SmartAStarChaser : NetworkBehaviour
     
     bool CheckPlayerVision()
     {
-        if (currentTarget == null) return false;
+        if (!currentTarget) return false;
         
         Vector2 toPlayer = currentTarget.position - transform.position;
         float distance = toPlayer.magnitude;
@@ -583,7 +505,7 @@ public class SmartAStarChaser : NetworkBehaviour
         if (distance <= directDetectionRange)
         {
             RaycastHit2D hit = Physics2D.Raycast(transform.position, toPlayer.normalized, distance, wallLayer);
-            bool canSee = (hit.collider == null);
+            bool canSee = !hit.collider;
             
             if (Time.frameCount % 120 == 0)
                 Debug.Log($"Chasing within 7m range: distance={distance}, canSeePlayer={canSee}");
@@ -620,7 +542,7 @@ public class SmartAStarChaser : NetworkBehaviour
     
     void CheckCatchPlayer()
     {
-        if (currentTarget == null) return;
+        if (!currentTarget) return;
         
         float distanceToPlayer = Vector2.Distance(transform.position, currentTarget.position);
         if (distanceToPlayer <= catchDistance)
@@ -629,7 +551,7 @@ public class SmartAStarChaser : NetworkBehaviour
             
             // 获取被抓住玩家的NetworkObject
             NetworkObject caughtPlayer = currentTarget.GetComponent<NetworkObject>();
-            if (caughtPlayer != null)
+            if (caughtPlayer)
             {
                 // 只向被抓住的玩家发送GameOver
                 CatchPlayerClientRpc(caughtPlayer.OwnerClientId);
