@@ -6,7 +6,7 @@ namespace Resources.Scripts
     public class BearTrap : Trap
     {
         private bool _triggered;
-        private void Update()
+        private void FixedUpdate()
         {
             Scan(); 
         }
@@ -15,8 +15,7 @@ namespace Resources.Scripts
         {
             if (_triggered) return;
             _triggered = true;
-            Animator animator = GetComponent<Animator>();
-            animator.Play(animator.GetCurrentAnimatorStateInfo(0).shortNameHash, -1, 0f);
+            GetComponent<SpriteRenderer>().sprite = Cache.LoadSprite("BearTrap2");
             character.ChangeHealthServerRpc();
             character.Status.Add((int)StatusID.Stuck);
         }
