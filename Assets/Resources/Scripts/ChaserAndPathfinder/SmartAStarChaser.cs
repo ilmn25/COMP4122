@@ -174,7 +174,8 @@ public class SmartAStarChaser : NetworkBehaviour
     void UpdateChasing()
     {
         // Check if target is lost
-        if (!currentTarget || !IsTargetInRange(currentTarget))
+        if (!currentTarget || !IsTargetInRange(currentTarget) ||
+            (currentTarget.GetComponent<Character>()?.CurrentHealth.Value ?? 0) <= 0)
         {
             currentState = ChaserState.Returning;
             currentTarget = null;
@@ -246,10 +247,10 @@ public class SmartAStarChaser : NetworkBehaviour
     
     void CheckForPlayersInSight()
     { 
-        
         // Check all players if they are in vision range
         foreach (Character player in Main.Players)
         {
+            if (player.CurrentHealth.Value <= 0) continue; // skip dead players
             if (IsTargetInSightRange(player.transform) && CheckSinglePlayerVision(player.transform))
             {
                 // Found player, start chasing
@@ -268,6 +269,8 @@ public class SmartAStarChaser : NetworkBehaviour
     
     bool IsTargetInSightRange(Transform target)
     { 
+        var character = target.GetComponent<Character>();
+        if (character != null && character.CurrentHealth.Value <= 0) return false;
         float distance = Vector2.Distance(transform.position, target.position);
         return distance <= visionRange;
     }
@@ -302,6 +305,9 @@ public class SmartAStarChaser : NetworkBehaviour
     
     bool CheckSinglePlayerVision(Transform player)
     { 
+        var character = player.GetComponent<Character>();
+        if (character != null && character.CurrentHealth.Value <= 0) return false;
+
         Vector2 toPlayer = player.position - transform.position;
         float distance = toPlayer.magnitude;
         
