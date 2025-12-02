@@ -44,15 +44,16 @@ namespace Resources.Scripts
         
         private void Update()
         {
-            if (IsOwner) HandleMovement(); 
+            if (!IsOwner) return;
+            HandleMovement(); 
             HandleAnimation();
             if (CurrentHealth.Value > 0) HandleInteraction();
         }
 
         private void HandleAnimation()
         {
+            Debug.Log(Direction);
             bool isMoving = Direction != Vector2.zero;
-
             if (CurrentHealth.Value == 0)
             {
                 if (!_animator.GetCurrentAnimatorStateInfo(0).IsName("Dead"))
