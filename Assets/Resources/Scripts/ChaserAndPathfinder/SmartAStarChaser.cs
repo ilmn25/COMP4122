@@ -7,6 +7,8 @@ using Resources.Scripts;
 
 public class SmartAStarChaser : NetworkBehaviour
 {
+    
+    //! Sorry zackary this script is reallty messy we ran out of time 
     [Header("A* Chaser Settings")]
     public float moveSpeed = 4f;
     public float chaseSpeed = 5f;
@@ -238,6 +240,17 @@ public class SmartAStarChaser : NetworkBehaviour
                 smoothTime, 
                 moveSpeed
             );
+            Vector2 direction = (newPosition - (Vector2)transform.position).normalized; 
+            
+            if (direction != Vector2.zero)
+                RequestPlayAnimation("Move", 0, 0.8f);   
+            else
+                RequestPlayAnimation("Idle", 0, 1);
+
+            if (direction.x < 0)    
+                RequestPlayAnimation("Left", 1); 
+            else if (direction.x > 0)
+                RequestPlayAnimation("Right", 1);
             transform.position = new Vector3(newPosition.x, newPosition.y, transform.position.z);
             
             if (Vector2.Distance(transform.position, targetPosition) < pathFollowingDistance)
@@ -405,6 +418,18 @@ public class SmartAStarChaser : NetworkBehaviour
             smoothTime, 
             seesPlayer ? chaseSpeed : moveSpeed
         );
+        
+        Vector2 direction = (newPosition - (Vector2)transform.position).normalized; 
+            
+        if (direction != Vector2.zero)
+            RequestPlayAnimation("Move", 0, 0.8f);   
+        else
+            RequestPlayAnimation("Idle", 0, 1);
+
+        if (direction.x < 0)    
+            RequestPlayAnimation("Left", 1); 
+        else if (direction.x > 0)
+            RequestPlayAnimation("Right", 1);
         transform.position = new Vector3(newPosition.x, newPosition.y, transform.position.z);
         
         // Check if reached current path point
