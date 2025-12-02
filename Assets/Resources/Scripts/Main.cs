@@ -34,9 +34,9 @@ namespace Resources.Scripts
         {
             Instance = this;
             
-            // Audio.PlaySfx(AudioClipID.Noise, true);
-            // Audio.PlayBGM(AudioClipID.JestersPity);
-            // Time.fixedDeltaTime = 0.30f;
+            Audio.PlaySfx(AudioClipID.Noise, true);
+            Audio.PlayBGM(AudioClipID.JestersPity);
+            Time.fixedDeltaTime = 0.30f;
             Application.targetFrameRate = 100; // set max fps 
             QualitySettings.vSyncCount = 0;
             Screen.SetResolution(640, 360, false);
