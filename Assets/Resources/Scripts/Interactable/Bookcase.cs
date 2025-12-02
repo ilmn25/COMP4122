@@ -14,7 +14,7 @@ namespace Resources.Scripts
         private CoroutineTask _coroutine;
         private readonly NetworkVariable<bool> _open = new();
         private bool _moved;
-
+        public SpriteRenderer wiring;
         private void Start()
         {
             _startPosition = transform.position;
@@ -33,6 +33,7 @@ namespace Resources.Scripts
             {
                 _moved = true;
                 Dialogue.Run(new DialogueData() { Text = "I heard furniture shifting in the north." });
+                wiring.enabled = true;
                 OpenServerRpc(true);
             }
         }

@@ -146172,6 +146172,7 @@ MonoBehaviour:
   - {fileID: 968689229}
   - {fileID: 2002907690}
   offset: {x: 4, y: 0}
+  wiring: {fileID: 8709343940013328971}
 --- !u!1001 &1906636166
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -52,7 +52,6 @@ namespace Resources.Scripts
 
         private void HandleAnimation()
         {
-            Debug.Log(Direction);
             bool isMoving = Direction != Vector2.zero;
             if (CurrentHealth.Value == 0)
             {
