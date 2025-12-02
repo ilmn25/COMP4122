@@ -152,8 +152,22 @@ public class SmartAStarChaser : NetworkBehaviour
             ref currentVelocity, 
             smoothTime, 
             patrolSpeed
-        );
+        ); 
+        
+        Vector2 direction = (newPosition - (Vector2)transform.position).normalized; 
+            
+        if (direction != Vector2.zero)
+            RequestPlayAnimation("Move", 0, 0.8f);   
+        else
+            RequestPlayAnimation("Idle", 0, 1);
+
+        if (direction.x < 0)    
+            RequestPlayAnimation("Left", 1); 
+        else if (direction.x > 0)
+            RequestPlayAnimation("Right", 1);
+        
         transform.position = new Vector3(newPosition.x, newPosition.y, transform.position.z);
+         
         
         // Check if reached current path point
         if (Vector2.Distance(transform.position, targetPosition) < pathFollowingDistance)
@@ -170,7 +184,13 @@ public class SmartAStarChaser : NetworkBehaviour
             }
         }
     }
-    
+
+    public Animator animator;
+    void RequestPlayAnimation(string stateName, int layer, float speed = -1)
+    {
+        if (layer == 0) animator.speed = speed;
+        animator.Play(stateName, layer);  
+    }
     void UpdateChasing()
     {
         // Check if target is lost
