@@ -9,13 +9,18 @@ namespace Resources.Scripts
     public class Bookcase : FurnitureMovable
     {
         public List<Clock> clocks = new ();
-        private GameObject wiring; 
-         
+        private bool _moved;
         private void Update()
         {
             bool correct = true;
             foreach (Clock clock in clocks)
-                if (!clock.IsCorrect.Value) correct = false; 
+                if (!clock.IsCorrect.Value) correct = false;
+
+            if (!_moved && correct)
+            {
+                _moved = true;
+                Dialogue.Run(new DialogueData(){Text = "I heard furniture shifting in the north."});
+            }
             OpenServerRpc(correct);
         } 
     }

@@ -65,7 +65,10 @@ namespace Resources.Scripts
                         if (_isUnlocked.Value)
                             OpenDoorServerRpc();
                         else if (character.Inventory.Contains((int)item))
+                        {
                             UnlockDoorServerRpc();
+                            character.Inventory.Remove((int)item);
+                        }
                         else 
                             Dialogue.Run(new DialogueData{Text = text});
                         break;
