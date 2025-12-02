@@ -1,4 +1,5 @@
 ﻿using Unity.Netcode;
+using Unity.VisualScripting;
 
 namespace Resources.Scripts
 {
@@ -8,7 +9,7 @@ namespace Resources.Scripts
 
         public override void Interact(Character character)
         {
-            character.Inventory.Add((int)id);
+            character.AddInventoryServerRpc((int)id);
             Audio.PlaySfx(AudioClipID.Item);
             
             // network-aware removal:
@@ -24,7 +25,7 @@ namespace Resources.Scripts
 
         public override void Interact(Character character)
         {
-            character.Inventory.Add((int)id);
+            character.AddInventoryServerRpc((int)id);
             Audio.PlaySfx(AudioClipID.Item);
             
             // network-aware removal:
@@ -32,5 +33,6 @@ namespace Resources.Scripts
             if (net.IsSpawned && NetworkManager.Singleton.IsServer) net.Despawn();
             else Destroy(gameObject);
         }
+         
     }
 }

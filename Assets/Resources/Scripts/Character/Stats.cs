@@ -19,6 +19,18 @@ namespace Resources.Scripts
             CurrentHealth.Value += value; 
             if (CurrentHealth.Value < 0) CurrentHealth.Value = 0;
             if (CurrentHealth.Value > MaxHealth.Value) CurrentHealth.Value = MaxHealth.Value;
-        } 
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void AddInventoryServerRpc(int value)
+        {
+            Inventory.Add(value);
+        }
+
+        [ServerRpc(RequireOwnership = false)]
+        public void RemoveInventoryServerRpc(int value)
+        {
+            Inventory.Remove(value);
+        }
     }
 }

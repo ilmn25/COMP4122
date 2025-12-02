@@ -67,7 +67,7 @@ namespace Resources.Scripts
                         else if (character.Inventory.Contains((int)item))
                         {
                             UnlockDoorServerRpc();
-                            character.Inventory.Remove((int)item);
+                            character.RemoveInventoryServerRpc((int)item);
                         }
                         else 
                             Dialogue.Run(new DialogueData{Text = text});
