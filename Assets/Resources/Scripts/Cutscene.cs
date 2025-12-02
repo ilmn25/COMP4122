@@ -19,45 +19,64 @@ namespace Resources.Scripts
         {
             Scene.OnValueChanged += (value, newValue) =>
             {
-                if (newValue == 1) StartCoroutine(Opening()); 
-                else if (newValue == 2) {
-                    Debug.Log("a");
+                if (newValue == 1) StartCoroutine(Opening()); else if (newValue == 2) {
                     StartCoroutine(Ending(new DialogueData
                     {
-                        Text = "I am dead",
+                        Text = "A silence falls over the room...",
                         Next = new Dictionary<string, DialogueData>
                         {
                             {
                                 "", new DialogueData
                                 {
-                                    Text = "We are all dead",
+                                    Text = "I am gone. My story ends here.",
                                     Next = new Dictionary<string, DialogueData>
                                     {
-                                        { "", new DialogueData { Text = "The end." } }
+                                        {
+                                            "", new DialogueData
+                                            {
+                                                Text = "And in the end, we are all shadows fading into memory.",
+                                                Next = new Dictionary<string, DialogueData>
+                                                {
+                                                    { "", new DialogueData { Text = "The story closes. The end." } }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
                     }));
-                    
                 }
-                else if (newValue == 3) StartCoroutine(Ending(new DialogueData
-                {
-                    Text = "30th December, 2027",
-                    Next = new Dictionary<string, DialogueData>
+                else if (newValue == 3) {
+                    StartCoroutine(Ending(new DialogueData
                     {
+                        Text = "30th December, 2027",
+                        Next = new Dictionary<string, DialogueData>
                         {
-                            "", new DialogueData
                             {
-                                Text = "Everyone escaped.",
-                                Next = new Dictionary<string, DialogueData>
+                                "", new DialogueData
                                 {
-                                    { "", new DialogueData { Text = "The end." } }
+                                    Text = "Against all odds, everyone escaped the darkness.",
+                                    Sprite = Cache.LoadSprite("PlayerDialogue"),
+                                    Next = new Dictionary<string, DialogueData>
+                                    {
+                                        {
+                                            "", new DialogueData
+                                            {
+                                                Text = "Escape tasted bittersweet, but it was ours at last.",
+                                                Sprite = Cache.LoadSprite("PlayerDialogue"),
+                                                Next = new Dictionary<string, DialogueData>
+                                                {
+                                                    { "", new DialogueData { Text = "The story finds its rest. The end." } }
+                                                }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                })); 
+                    }));
+                }
             };
         }
 

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace Resources.Scripts
 {
+    // no time to clean up this script
     public class WinZone : Interactable
     {
         private HashSet<ulong> playersReached = new HashSet<ulong>();
@@ -37,16 +38,10 @@ namespace Resources.Scripts
             if (playersReached.Count >= totalPlayers && totalPlayers > 0)
             {
                 winTriggered.Value = true;
-                TriggerWinForAllClientRpc();
+                Cutscene.Scene.Value = 3;
             }
         }
-        
-        [ClientRpc]
-        private void TriggerWinForAllClientRpc()
-        {
-            WinUI.Instance?.ShowWinUI();
-        }
-        
+         
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
