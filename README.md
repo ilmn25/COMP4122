@@ -1,8 +1,7 @@
 # 2D Coop Unity Game Prototype
-## About
-#### Note: Most of this game was made in the span of 3 days with barely any sleep
-**This game-jam type game is:** 
-- a puzzle-escape type game similar to Ao Oni  
+ 
+Note: most of this put together in several days with no sleep   
+- puzzle-escape game similar to Ao Oni  
 - supports online coop through Unity Netcode
 - was mainly for learning to collab using github
   
