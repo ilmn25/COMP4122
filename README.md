@@ -1,6 +1,6 @@
 # 2D Coop Unity Game Prototype
  
-Note: most of this put together in several days with no sleep   
+Note: most of this was put together in several days with no sleep   
 - puzzle-escape game similar to Ao Oni  
 - supports online coop through Unity Netcode
 - was mainly for learning to collab using github
