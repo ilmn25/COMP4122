@@ -22,5 +22,4 @@ Note: most of this was put together in several days with no sleep
 <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/ead6daff-18f4-4ae5-858b-cce3bf14f7dc" />
 
 <img width="1919" height="1079" alt="image" src="https://github.com/user-attachments/assets/ff7690e7-4afa-43c1-9c8d-88edcecb8139" />
-
-<img width="700"  alt="image" src="https://github.com/user-attachments/assets/36c7708c-7d4d-48bc-a445-8f3aaf782723" />
+ 
